@@ -3,53 +3,63 @@ import pygame
 import random
 from PIL import Image
 from Point import *
-#import rt
 import math
 import threading
 from Line import *
-
+from bresenham import bresenham
+from RayOperations import *
 
 def raytrace(surface,num):
-    #Raytraces the scene progessively
-    for i in range (5):
-        #random point in the image
-        point = Point(random.uniform(0, 500), random.uniform(0, 500))
-        #pixel color
-        pixel = 0
+    
+    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 4)
+    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[1].x,fuentesDeLuz[1].y], 4)
+    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[2].x,fuentesDeLuz[2].y], 4)
+    
+    for i in range (1):
+        for j in range (360*8):
+            for k in range (len(fuentesDeLuz)):
+                luz=fuentesDeLuz[k]
 
-        for luz in fuentesDeLuz:
-            #calculates direction to light source
-            
-            #dir = luz-point
-            lineaLuzAPunto = Line(luz.x,luz.y,point.x,point.y)
-            distanciaLuzAPunto = point.distanciaEntreDosPuntos(luz)
-            lineaLuzAPunto.draw (surface)
-
-            #distance between point and light source
-            #normalized distance to source
-            #length2 = rt.length(rt.normalize(dir))
-            
-            interseca = True
-            for wall in walls:           
-                #if intersection, or if intersection is closer than light source
-                if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
-                    #check if ray intersects with segment
-                    dist = lineaLuzAPunto.linesIntersection(wall)
-                    print ("Interseca.")
-                    break
-
-            if interseca:        
-                intensity = (1-(distanciaLuzAPunto/500))**2
-                intensity = max(0, min(intensity, 255))
-                values = (ref[int(point.y)][int(point.x)])[:3]
-                #combine color, light source and light color
-                values = values * intensity * light
+                #Toma un punto lejano dentro de los 360 radianes al rededor de la fuente de luz en la que está revisando
+                point = Point(luz.x + math.cos(math.radians(j/8))*300, luz.y + math.sin(math.radians(j/8))*300)
+                if(point.x<0):
+                    point.x = 0
+                if(point.x>499):
+                    point.x = 499
+                if(point.y<0):
+                    point.y = 0
+                if(point.y>499):
+                    point.y =499
+                                
+                lineaLuzAPunto = Line(point.x,point.y,luz.x,luz.y)
                 
-                #add all light sources 
-                pixel += values
-            
-            #average pixel value and assign
-            px[int(point.x)][int(point.y)] = pixel // len(fuentesDeLuz)
+                #lineaLuzAPunto.draw (surface,0,255,0) 
+                
+                interseca = True
+                for wall in walls:           
+                    if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
+                        puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
+                        
+                        #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
+                        if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
+                            point = puntoInterseccion
+                    else:
+                        interseca = False
+                        
+                        #rayoDeLuz= Line(luz.x,luz.y,point.x,point.y)b
+                        #rayoDeLuz.draw (surface,255,0,0)
+                        #pygame.draw.circle(surface, 245, [int(puntoInterseccion.x),int(puntoInterseccion.y)], 4)
+
+                distanciaLuzAPunto = point.distanciaEntreDosPuntos(luz)  
+                intensidad = (1-(distanciaLuzAPunto/500))**2
+                intensidad = min(intensidad, 255)
+                #print (intensidad)
+                drawRayOfLight(surface, px, ref, intensidad, point, luz)
+                
+                #Tendría que rebotar
+                if interseca:
+                    n=0
+
 
 
 def getFrame():
@@ -79,15 +89,14 @@ im_file = Image.open("Back.png")
 ref = np.array(im_file)
 
 #light positions
-fuentesDeLuz = [ Point(373,224) ]
-#Point(128,133), Point(220,360), 
+fuentesDeLuz = [ Point(373,224), Point(128,133), Point(220,446) ]
 
 #light color
 light = np.array([1, 1, 0.75])
 #light = np.array([1, 1, 1])
 
 #warning, point order affects intersection test!!
-walls = [Line(267, 23, 267, 369)]
+walls = [Line(267, 23, 267, 369), 
             Line(14, 23, 173, 23), 
             Line(14, 23, 14, 256),
             Line(14, 256, 77, 256),
@@ -103,7 +112,6 @@ walls = [Line(267, 23, 267, 369)]
 #thread setup
 npimage=getFrame()
 surface = pygame.surfarray.make_surface(npimage)
-
 t = threading.Thread(target = raytrace,args=(surface,0)) # f being the function that tells how the ball should move
 t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
 t.start()
@@ -116,7 +124,7 @@ while not done:
 
         # Clear screen to white before drawing 
         for wall in walls:
-            wall.draw(surface)
+            wall.draw(surface, 255,255,255)
         screen.fill((255, 255, 255))
 
         # Get a numpy array to display from the simulation
@@ -124,6 +132,8 @@ while not done:
 
         # Convert to a surface and splat onto screen offset by border width and height
         
+        npimage=getFrame()
+        surface = pygame.surfarray.make_surface(npimage)
         screen.blit(surface, (border, border))
 
         pygame.display.flip()

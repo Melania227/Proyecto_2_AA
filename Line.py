@@ -20,17 +20,15 @@ class Line:
         y3 = other.inicio.y
         x4 = other.final.x
         y4 = other.final.y
+        
         denominador = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
-        if (denominador != 0):
-            t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denominador
-            u = -((x1-x2)*(y1-y3) - (y1-y2)*(x1-x3)) / denominador
+        t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denominador
 
-            if (0.0<t<1.0 and 0.0<u<1.0):
-                xInterseccion = x1 + t*(x2-x1)
-                yInterseccion = y1 + t*(y2-y1)
-                return Point (xInterseccion,yInterseccion)
+        xInterseccion = x1 + t*(x2-x1)
+        yInterseccion = y1 + t*(y2-y1)
+        
+        return Point (xInterseccion,yInterseccion)
 
-        return -1.0
 
     def lineIntersectOrNot(self, other):
         x1 = self.inicio.x
@@ -51,5 +49,5 @@ class Line:
 
         return False
 
-    def draw(self, screen):
-        pygame.draw.line(screen,(255,200,164),(self.inicio.x, self.inicio.y),(self.final.x, self.final.y),3)
+    def draw(self, screen, color1, color2, color3):
+        pygame.draw.line(screen,(color1, color2, color3),(self.inicio.x, self.inicio.y),(self.final.x, self.final.y),3)

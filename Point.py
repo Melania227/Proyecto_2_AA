@@ -28,3 +28,7 @@ class Point:
 
     def distanciaEntreDosPuntos(self, other):
         return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
+    
+    def distanciaNormalizada (self, other):
+        res = (self - other) / self.distanciaEntreDosPuntos(other)
+        return res
