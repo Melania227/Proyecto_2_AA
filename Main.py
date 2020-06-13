@@ -14,14 +14,20 @@ def raytrace(surface,num):
     #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 4)
     #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[1].x,fuentesDeLuz[1].y], 4)
     #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[2].x,fuentesDeLuz[2].y], 4)
-    
+    pintados = []
+    for l in range (500):
+        fila = []
+        for m in range (500):
+            fila+=[[]]
+        pintados += [fila]
+        
     for i in range (1):
-        for j in range (360*8):
+        for j in range (360*10):
             for k in range (len(fuentesDeLuz)):
                 luz=fuentesDeLuz[k]
 
                 #Toma un punto lejano dentro de los 360 radianes al rededor de la fuente de luz en la que está revisando
-                point = Point(luz.x + math.cos(math.radians(j/8))*300, luz.y + math.sin(math.radians(j/8))*300)
+                point = Point(luz.x + math.cos(math.radians(j/10))*300, luz.y + math.sin(math.radians(j/10))*300)
                 if(point.x<0):
                     point.x = 0
                 if(point.x>499):
@@ -39,7 +45,6 @@ def raytrace(surface,num):
                 for wall in walls:           
                     if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
                         puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
-                        
                         #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
                         if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
                             point = puntoInterseccion
@@ -50,12 +55,10 @@ def raytrace(surface,num):
                         #rayoDeLuz.draw (surface,255,0,0)
                         #pygame.draw.circle(surface, 245, [int(puntoInterseccion.x),int(puntoInterseccion.y)], 4)
 
-                distanciaLuzAPunto = point.distanciaEntreDosPuntos(luz)  
-                intensidad = (1-(distanciaLuzAPunto/500))**2
-                intensidad = min(intensidad, 255)
-                #print (intensidad)
-                drawRayOfLight(surface, px, ref, intensidad, point, luz)
+                intensidad = 0.9
                 
+
+                drawRayOfLight(surface, px, ref, intensidad, point, luz, pintados)
                 #Tendría que rebotar
                 if interseca:
                     n=0
@@ -89,7 +92,9 @@ im_file = Image.open("Back.png")
 ref = np.array(im_file)
 
 #light positions
-fuentesDeLuz = [ Point(373,224), Point(128,133), Point(220,446) ]
+fuentesDeLuz = [ Point(128,133), Point(373,224) , Point (220,448)]
+#fuentesDeLuz = [ Point(373,224)]
+
 
 #light color
 light = np.array([1, 1, 0.75])
@@ -97,17 +102,19 @@ light = np.array([1, 1, 0.75])
 
 #warning, point order affects intersection test!!
 walls = [Line(267, 23, 267, 369), 
-            Line(14, 23, 173, 23), 
-            Line(14, 23, 14, 256),
-            Line(14, 256, 77, 256),
-            Line(77, 256, 77,483),
-            Line(77,483, 362, 483),
-            Line(362, 333, 362, 483),
-            Line(362, 333, 488, 333),
-            Line(488, 23, 488, 333),
-            Line(267, 23, 488, 23),
-            Line(173, 248, 267, 248),
-            Line(173, 23, 173, 369)]
+        Line(14, 23, 173, 23), 
+        Line(14, 23, 14, 256),
+        Line(14, 256, 77, 256),
+        Line(77, 256, 77,483),
+        Line(77,483, 362, 483), 
+        Line(362, 333, 362, 483),
+        Line(362, 333, 488, 333),
+        Line(488, 23, 488, 333),
+        Line(267, 23, 488, 23), 
+        Line(173, 248, 267, 248),
+        Line(173, 23, 173, 369)]
+
+#walls = [Line(267, 23, 267, 369),Line(267, 23, 488, 23), Line(488, 23, 488, 333),Line(362, 333, 362, 483),Line(77, 256, 77,483)]
 
 #thread setup
 npimage=getFrame()
