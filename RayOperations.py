@@ -40,6 +40,27 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, 
 #        else:
 #            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = get_color(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])], imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad)
 
+
+def drawRayOfLightMirror(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz ):
+    trazoPixelesPorPintar = list(bresenham(int(puntoActual.x),int(puntoActual.y),int(fuenteLuz.x),int(fuenteLuz.y)))
+    totalAPintar = 350
+    rango = totalAPintar//8
+    contador=0
+    intensidad=0.9
+
+    for i in range (len(trazoPixelesPorPintar)-1,0, -1):
+        if (contador==rango):
+            contador=0
+            intensidad = intensidad - 0.1
+        contador += 1
+        intensidadPasada =  pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] / imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][0]
+        intensidadNueva = intensidad + intensidadPasada
+
+        if (intensidadNueva >= intensidadPasada):
+            if (intensidadNueva>0.9):
+                intensidadNueva = 0.9
+            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidadNueva
+        
 def get_color(colorRGBA1, colorRGBA2):
     red   = (colorRGBA1[0] + colorRGBA2[0]) / 2
     green = (colorRGBA1[1] + colorRGBA2[1]) / 2

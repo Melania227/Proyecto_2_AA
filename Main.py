@@ -11,9 +11,6 @@ from RayOperations import *
 
 def raytrace(surface,num):
     
-    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 4)
-    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[1].x,fuentesDeLuz[1].y], 4)
-    #pygame.draw.circle(surface, (255,255,0), [fuentesDeLuz[2].x,fuentesDeLuz[2].y], 4)
     pintados = []
     for l in range (500):
         fila = []
@@ -41,35 +38,71 @@ def raytrace(surface,num):
                 
                 #lineaLuzAPunto.draw (surface,0,255,0) 
                 
-                interseca = True
                 for wall in walls:           
                     if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
+                        interseca = True
                         puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
                         #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
                         if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
                             point = puntoInterseccion
+                        paredesRecursivo(lineaLuzAPunto, point) 
                     else:
                         interseca = False
-                        
-                        #rayoDeLuz= Line(luz.x,luz.y,point.x,point.y)b
-                        #rayoDeLuz.draw (surface,255,0,0)
-                        #pygame.draw.circle(surface, 245, [int(puntoInterseccion.x),int(puntoInterseccion.y)], 4)
+
+                for mirror in mirrors:
+                    if  (lineaLuzAPunto.lineIntersectOrNot(mirror)):
+                        if not(interseca and luz.distanciaEntreDosPuntos(point)<luz.distanciaEntreDosPuntos(lineaLuzAPunto.linesIntersection(mirror))):
+                            #el mae recoje todos los rayos que chocan con el espejo y el punto de interseccion
+                            espejos(lineaLuzAPunto,lineaLuzAPunto.linesIntersection(mirror))
 
                 intensidad = 0.9
                 
 
                 drawRayOfLight(surface, px, ref, intensidad, point, luz, pintados)
                 #Tendría que rebotar
-                if interseca:
-                    n=0
 
 
+#pensado en que solo hay un espejo
+def espejos(lineaLuzPunto, interseccion):    
+    #hay que redireccionar el rayo
+    lineaLuzPunto.inicio.y = (interseccion.y-lineaLuzPunto.inicio.y)+interseccion.y
+    lineaLuzPunto.final = interseccion
+    #En este punto no interseca con un espejo
+
+    interseca = False
+    for wall in walls:
+        if(lineaLuzPunto.lineIntersectOrNot(wall)):
+            puntoInterseccion = lineaLuzPunto.linesIntersection(wall)
+            interseca = True
+            if (lineaLuzPunto.final.distanciaEntreDosPuntos(puntoInterseccion)<lineaLuzPunto.final.distanciaEntreDosPuntos(lineaLuzPunto.inicio)): 
+                lineaLuzPunto.inicio = puntoInterseccion
+    if interseca:
+        paredesRecursivo(lineaLuzPunto, lineaLuzPunto.inicio) 
+
+    drawRayOfLightMirror(surface, px, ref, 0.9 , lineaLuzPunto.inicio, lineaLuzPunto.final)
+
+
+def paredesRecursivo(rayoInicio, puntoFinal):
+    #Validar si es horizontal o vertical
+    if(puntoFinal.x-rayoInicio.final.x>0):
+        #Es vertical
+        distancia = rayoInicio.final.distanciaEntreDosPuntos(puntoFinal)
+        puntoFinal.y +=distancia
+        cita = math.acos(puntoFinal.y)
+    else:
+        distancia =rayoInicio.final.distanciaEntreDosPuntos(puntoFinal)
+        puntoFinal.x +=distancia
+
+        
+    for mirror in mirrors:
+        pass
+    for wall in walls: 
+        pass
 
 def getFrame():
     # grabs the current image and returns it
     pixels = np.roll(px,(1,2),(0,1))
     return pixels
-
 
 #pygame stuff
 h,w=550,550
@@ -115,6 +148,8 @@ walls = [Line(267, 23, 267, 369),
         Line(173, 23, 173, 369)]
 
 #walls = [Line(267, 23, 267, 369),Line(267, 23, 488, 23), Line(488, 23, 488, 333),Line(362, 333, 362, 483),Line(77, 256, 77,483)]
+
+mirrors = [Line(303, 146, 325, 146)]
 
 #thread setup
 npimage=getFrame()
