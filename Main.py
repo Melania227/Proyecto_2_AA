@@ -35,56 +35,35 @@ def raytrace(surface,num):
                     point.y =499
                                 
                 lineaLuzAPunto = Line(point.x,point.y,luz.x,luz.y)
-                
-                #lineaLuzAPunto.draw (surface,0,255,0) 
-                
-                for wall in walls:           
-                    if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
-                        interseca = True
-                        puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
-                        #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
-                        if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
-                            point = puntoInterseccion
-                        paredesRecursivo(lineaLuzAPunto, point) 
-                    else:
-                        interseca = False
-
-                for mirror in mirrors:
-                    if  (lineaLuzAPunto.lineIntersectOrNot(mirror)):
-                        if not(interseca and luz.distanciaEntreDosPuntos(point)<luz.distanciaEntreDosPuntos(lineaLuzAPunto.linesIntersection(mirror))):
-                            #el mae recoje todos los rayos que chocan con el espejo y el punto de interseccion
-                            espejos(lineaLuzAPunto,lineaLuzAPunto.linesIntersection(mirror))
-
-                intensidad = 0.9
+                rayLightsRecursion (lineaLuzAPunto, pintados, luz, point)
                 
 
-                drawRayOfLight(surface, px, ref, intensidad, point, luz, pintados)
-                #Tendría que rebotar
-
-
-#pensado en que solo hay un espejo
-def espejos(lineaLuzPunto, interseccion):    
-    #hay que redireccionar el rayo
-    lineaLuzPunto.inicio.y = (interseccion.y-lineaLuzPunto.inicio.y)+interseccion.y
-    lineaLuzPunto.final = interseccion
-    #En este punto no interseca con un espejo
-
+def rayLightsRecursion(lineaLuzAPunto, pintados, luz, point):
     interseca = False
-    for wall in walls:
-        if(lineaLuzPunto.lineIntersectOrNot(wall)):
-            puntoInterseccion = lineaLuzPunto.linesIntersection(wall)
+    for wall in walls:           
+        if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
             interseca = True
-            if (lineaLuzPunto.final.distanciaEntreDosPuntos(puntoInterseccion)<lineaLuzPunto.final.distanciaEntreDosPuntos(lineaLuzPunto.inicio)): 
-                lineaLuzPunto.inicio = puntoInterseccion
-    if interseca:
-        paredesRecursivo(lineaLuzPunto, lineaLuzPunto.inicio) 
+            puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
+            #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
+            if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
+                point = puntoInterseccion
+                wallCercana = wall
 
-    drawRayOfLightMirror(surface, px, ref, 0.9 , lineaLuzPunto.inicio, lineaLuzPunto.final)
+    if (interseca):
+        puntoDestino = paredesRecursivo(lineaLuzAPunto, point, walls, mirrors, surface, px, ref,pintados)
+        nuevaLinea = lineaLuzAPunto
+        nuevaLinea.final = point
+        nuevaLinea.inicio = puntoDestino
+        rayLightsRecursion(nuevaLinea, pintados, point, puntoDestino)
 
-
-def paredesRecursivo(rayoInicio, puntoFinal):
-    pass
-    #Validar si es horizontal o vertical
+    intensidad = 0.9 #Arreglar intensidades
+    drawRayOfLight(surface, px, ref, intensidad, point, luz, pintados,False)
+    
+#    for mirror in mirrors:
+ #       if  (lineaLuzAPunto.lineIntersectOrNot(mirror)):
+  #          if not(interseca and luz.distanciaEntreDosPuntos(point)<luz.distanciaEntreDosPuntos(lineaLuzAPunto.linesIntersection(mirror))):
+                #el mae recoje todos los rayos que chocan con el espejo y el punto de interseccion
+   #             espejos(lineaLuzAPunto,lineaLuzAPunto.linesIntersection(mirror), walls, mirrors, surface, px, ref,pintados)
 
 
 def getFrame():
