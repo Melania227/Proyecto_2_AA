@@ -83,21 +83,9 @@ def espejos(lineaLuzPunto, interseccion):
 
 
 def paredesRecursivo(rayoInicio, puntoFinal):
+    pass
     #Validar si es horizontal o vertical
-    if(puntoFinal.x-rayoInicio.final.x>0):
-        #Es vertical
-        distancia = rayoInicio.final.distanciaEntreDosPuntos(puntoFinal)
-        puntoFinal.y +=distancia
-        cita = math.acos(puntoFinal.y)
-    else:
-        distancia =rayoInicio.final.distanciaEntreDosPuntos(puntoFinal)
-        puntoFinal.x +=distancia
 
-        
-    for mirror in mirrors:
-        pass
-    for wall in walls: 
-        pass
 
 def getFrame():
     # grabs the current image and returns it
