@@ -8,6 +8,7 @@ import threading
 from Line import *
 from bresenham import bresenham
 from RayOperations import *
+from Bound import *
 
 def raytrace(surface,num):
     
@@ -35,28 +36,42 @@ def raytrace(surface,num):
                     point.y =499
                                 
                 lineaLuzAPunto = Line(point.x,point.y,luz.x,luz.y)
-                rayLightsRecursion (lineaLuzAPunto, pintados, luz, point)
+                rayLightsRecursion (lineaLuzAPunto, pintados, luz, point, 0.9)
                 
 
-def rayLightsRecursion(lineaLuzAPunto, pintados, luz, point):
+def rayLightsRecursion(lineaLuzAPunto, pintados, luz, point, intensidad):
     interseca = False
     for wall in walls:           
-        if  (lineaLuzAPunto.lineIntersectOrNot(wall)):
+        if  (lineaLuzAPunto.lineIntersectOrNot(wall.linea)):
             interseca = True
-            puntoInterseccion = lineaLuzAPunto.linesIntersection(wall)
+            puntoInterseccion = lineaLuzAPunto.linesIntersection(wall.linea)
             #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
-            if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
-                point = puntoInterseccion
-                wallCercana = wall
+            if (puntoInterseccion != lineaLuzAPunto.final):
+                if (luz.distanciaEntreDosPuntos(puntoInterseccion)<luz.distanciaEntreDosPuntos(point)):
+                    point = puntoInterseccion
+                    boundCercano = wall
 
     if (interseca):
-        puntoDestino = paredesRecursivo(lineaLuzAPunto, point, walls, mirrors, surface, px, ref,pintados)
-        nuevaLinea = lineaLuzAPunto
-        nuevaLinea.final = point
-        nuevaLinea.inicio = puntoDestino
-        rayLightsRecursion(nuevaLinea, pintados, point, puntoDestino)
+        if (boundCercano.wall):
+            puntoDestino = paredesRecursivo(lineaLuzAPunto, point, boundCercano)
+            nuevaLinea = lineaLuzAPunto
+            nuevaLinea.final = point
+            nuevaLinea.inicio = puntoDestino
 
-    intensidad = 0.9 #Arreglar intensidades
+            #sacamos la intensidad de partida
+            repeticiones = lineaLuzAPunto.inicio.distanciaEntreDosPuntos(lineaLuzAPunto.final) // (350//12)
+            intensidadDePartida= 1-(repeticiones/10)
+        
+        else:
+            lineaReflejoEspejo = espejos(lineaLuzAPunto, point)
+            puntoDestino = lineaReflejoEspejo.inicio
+            nuevaLinea = lineaLuzAPunto
+            nuevaLinea.final = point
+            nuevaLinea.inicio = puntoDestino
+            intensidadDePartida = 1
+
+        rayLightsRecursion(nuevaLinea, pintados, point, puntoDestino, intensidadDePartida)
+
     drawRayOfLight(surface, px, ref, intensidad, point, luz, pintados,False)
     
 #    for mirror in mirrors:
@@ -101,22 +116,21 @@ light = np.array([1, 1, 0.75])
 #light = np.array([1, 1, 1])
 
 #warning, point order affects intersection test!!
-walls = [Line(267, 23, 267, 369), 
-        Line(14, 23, 173, 23), 
-        Line(14, 23, 14, 256),
-        Line(14, 256, 77, 256),
-        Line(77, 256, 77,483),
-        Line(77,483, 362, 483), 
-        Line(362, 333, 362, 483),
-        Line(362, 333, 488, 333),
-        Line(488, 23, 488, 333),
-        Line(267, 23, 488, 23), 
-        Line(173, 248, 267, 248),
-        Line(173, 23, 173, 369)]
+walls = [Bound(8,23,180,22, True), 
+         Bound(261, 23, 495, 23, True), 
+         Bound(173, 243, 267, 243, True),
+         Bound(8, 257, 77, 257, True),
+         Bound(362, 333, 495,333, True),
+         Bound(71, 484, 369, 484, True), 
+         Bound(15, 16, 15, 274, True),
+         Bound(77, 257, 77, 499, True),
+         Bound(173, 16, 173, 370, True), 
+         Bound(267, 16, 267, 370, True),
+         Bound(362, 333, 362, 499, True),
+         Bound(489, 16, 489, 350, True),
+         Bound(303, 146, 325, 146, False)]
 
 #walls = [Line(267, 23, 267, 369),Line(267, 23, 488, 23), Line(488, 23, 488, 333),Line(362, 333, 362, 483),Line(77, 256, 77,483)]
-
-mirrors = [Line(303, 146, 325, 146)]
 
 #thread setup
 npimage=getFrame()

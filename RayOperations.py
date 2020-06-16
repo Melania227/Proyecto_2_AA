@@ -18,6 +18,11 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, 
                 intensidad = intensidad - 0.1
         contador += 1
 
+        if (intensidad>1):
+            intensidad = 0.9
+        if (intensidad<0.1):
+            intensidad = 0.1
+
         if (int(trazoPixelesPorPintar[i][0]) >= 0 and int(trazoPixelesPorPintar[i][0]) <=499 and int(trazoPixelesPorPintar[i][1]) >= 0 and int(trazoPixelesPorPintar[i][1]) <=499):
             if(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][1] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][2] == 0):
                 pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad
@@ -33,14 +38,13 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, 
                     intensidadPasada = 0.2
                 intensidadNueva = intensidad + intensidadPasada
 
-                #if (intensidad < intensidadPasada):
-                #   intensidadNueva = intensidadPasada + 0.05
-                if (intensidadNueva >= intensidadPasada):
-                    if (intensidadNueva>0.9):
-                        intensidadNueva = 0.9
-                    pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidadNueva
-                    pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])]+=[fuenteLuz]
-        
+                if not (intensidad < intensidadPasada):
+                    if (intensidadNueva >= intensidadPasada):
+                        if (intensidadNueva>0.9):
+                            intensidadNueva = 0.9
+                        pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidadNueva
+                        pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])]+=[fuenteLuz]
+            
 #ESTO COMBINA LOS COLORES DE DOS PIXELES, EL ACTUAL Y EL DE REFERENCIA:
 #        if(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][1] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][2] == 0):
 #            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad
@@ -54,35 +58,24 @@ def get_color(colorRGBA1, colorRGBA2):
     return [int(red), int(green), int(blue)]
 
 #pensado en que solo hay un espejo
-def espejos(lineaLuzPunto, interseccion, walls, mirrors, surface, px, ref,pintados):    
+def espejos(lineaLuzPunto, interseccion):    
     #hay que redireccionar el rayo
     lineaLuzPunto.inicio.y = (interseccion.y-lineaLuzPunto.inicio.y)+interseccion.y
     lineaLuzPunto.final = interseccion
     #En este punto no interseca con un espejo
+    return lineaLuzPunto
 
-    interseca = False
-    for wall in walls:
-        if(lineaLuzPunto.lineIntersectOrNot(wall)):
-            puntoInterseccion = lineaLuzPunto.linesIntersection(wall)
-            interseca = True
-            if (lineaLuzPunto.final.distanciaEntreDosPuntos(puntoInterseccion)<lineaLuzPunto.final.distanciaEntreDosPuntos(lineaLuzPunto.inicio)): 
-                lineaLuzPunto.inicio = puntoInterseccion
-    if interseca:
-        paredesRecursivo(lineaLuzPunto, lineaLuzPunto.inicio, walls, mirrors, surface, px, ref,pintados) 
-
-    drawRayOfLight(surface, px, ref, 0.9 , lineaLuzPunto.inicio, lineaLuzPunto.final,pintados,True)
-
-def paredesRecursivo(rayoOriginal, puntoInterseccion, walls, mirrors, surface, px, ref,pintados):
+def paredesRecursivo(rayoOriginal, puntoInterseccion, wall):
     largoRayo = puntoInterseccion.distanciaEntreDosPuntos(rayoOriginal.inicio)
-    if (rayoOriginal.inicio.y == puntoInterseccion.y):
+    if (wall.linea.inicio.y == puntoInterseccion.y):
         #HORIZONTAL
         if (rayoOriginal.inicio.y > puntoInterseccion.y):
             #RAYO VIENE DE ABAJO
-            angulo = random.uniform (0,180)
+            angulo = random.uniform (180,360)
             puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
         else:
             #RAYO VIENE DE ARRIBA
-            angulo = random.uniform (180,360)
+            angulo = random.uniform (0,180)
             puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
     else:
         #VERTICAL
@@ -93,8 +86,5 @@ def paredesRecursivo(rayoOriginal, puntoInterseccion, walls, mirrors, surface, p
             #RAYO VIENE DE LA IZQUIERDA
             angulo = random.uniform (270,450)
             puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
-    
-    repeticiones = rayoOriginal.inicio.distanciaEntreDosPuntos(rayoOriginal.final) // (350//15)
-    intensidadDePartida= 1-(repeticiones/10)
 
     return puntoDestino
