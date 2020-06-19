@@ -5,43 +5,54 @@ from bresenham import bresenham
 import numpy as np 
 import random
 
-def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, pintados):
-    trazoPixelesPorPintar = list(bresenham(int(fuenteLuz.x),int(fuenteLuz.y),int(puntoActual.x),int(puntoActual.y)))
-    totalAPintar = 250
-    rango = totalAPintar//12
-    contador=0
+def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, pintados, intensidadesDePixeles, colores):
+    trazoPixelesPorPintar = list(bresenham(int(fuenteLuz.fuente.x),int(fuenteLuz.fuente.y),int(puntoActual.x),int(puntoActual.y)))
 
-    for i in range (len(trazoPixelesPorPintar)):
-        if (contador==rango):
-            contador=0
-            if (intensidad >= 0.2):
-                intensidad = intensidad - 0.1
-        contador += 1
+    for pixelAct in (trazoPixelesPorPintar):
+        puntoDestinoAct = Point(pixelAct[0], pixelAct[1])
+        largoDelRayo = fuenteLuz.fuente.distanciaEntreDosPuntos(puntoDestinoAct)
+        intensidad= (1-(largoDelRayo/500))**2
 
-        if (intensidad>0.9):
-            intensidad = 0.9
-        if (intensidad<0.1):
-            intensidad = 0.1
+        if (int(pixelAct[0]) >= 0 and int(pixelAct[0]) <=499 and int(pixelAct[1]) >= 0 and int(pixelAct[1]) <=499):
+            intensidadPasada = (intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])])
+            intensidadTemp = intensidadPasada + intensidad
 
-        if (int(trazoPixelesPorPintar[i][0]) >= 0 and int(trazoPixelesPorPintar[i][0]) <=499 and int(trazoPixelesPorPintar[i][1]) >= 0 and int(trazoPixelesPorPintar[i][1]) <=499):
-            if(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][1] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][2] == 0):
-                pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad
-                pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])]+=[fuenteLuz]
+            if (intensidadTemp>1):
+                intensidadTemp = 1
+            #REFLEJO O NO?
 
-            else:
-                if (imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][0] != 0):
-                    intensidadPasada =  pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] / imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][0]
-                else:
-                    intensidadPasada = 0.2
-                intensidadNueva = intensidad + intensidadPasada
-
-                if not (intensidad < intensidadPasada):
-                    if (intensidadNueva >= intensidadPasada):
-                        if (intensidadNueva>0.9):
-                            intensidadNueva = 0.9
-                        pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidadNueva
-                        pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])]+=[fuenteLuz]
+            if (fuenteLuz.fuente == pintados[int(pixelAct[0])][int(pixelAct[1])]):
+                continue
             
+            else:
+                if (colores[int(pixelAct[0])][int(pixelAct[1])] == [0,0,0]):
+                    if (intensidadTemp > intensidadPasada):
+                        #INTENSIDAD
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
+                        #COLOR
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= fuenteLuz.color[0]/255
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= fuenteLuz.color[1]/255
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= fuenteLuz.color[2]/255
+                        #REGISTRO
+                        pintados[int(pixelAct[0])][int(pixelAct[1])] = fuenteLuz.fuente
+                        intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
+                        colores[int(pixelAct[0])][int(pixelAct[1])] = [fuenteLuz.color[0],fuenteLuz.color[1], fuenteLuz.color[2]]
+                else:
+                    #TOCA COMBINAR COLORES E INTENSIDADES
+                    if (intensidadTemp > intensidadPasada):
+                        #INTENSIDAD
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
+                        #COLOR
+                        nuevoColor = get_color (colores[int(pixelAct[0])][int(pixelAct[1])], fuenteLuz.color)
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= nuevoColor[0]/255
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
+                        pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
+                        #REGISTRO
+                        pintados[int(pixelAct[0])][int(pixelAct[1])] = fuenteLuz.fuente
+                        intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
+                        colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
+
 #ESTO COMBINA LOS COLORES DE DOS PIXELES, EL ACTUAL Y EL DE REFERENCIA:
 #        if(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][1] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][2] == 0):
 #            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad

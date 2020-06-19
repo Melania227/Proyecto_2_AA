@@ -8,6 +8,7 @@ import threading
 from Bound import *
 from Line import *
 from RayOperations import *
+from Light import *
 
 
 def pointLauncher(surface, num):
@@ -17,9 +18,23 @@ def pointLauncher(surface, num):
     for l in range (500):
         fila = []
         for m in range (500):
-            fila+=[[]]
+            fila+=[Point (0,0)]
         pixelesPintados += [fila]
 
+    intensidades = []
+    for l in range (500):
+        fila = []
+        for m in range (500):
+            fila+=[0]
+        intensidades += [fila]
+
+    colores = []
+    for l in range (500):
+        fila = []
+        for m in range (500):
+            fila+=[[0,0,0]]
+        colores += [fila]
+    
     #for wall in walls:
     #   wall.draw(surface,255,255,255)
     #pygame.draw.circle(surface, (255,255,255), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 5)
@@ -28,7 +43,7 @@ def pointLauncher(surface, num):
     
     for i in range (n):
         for luz in fuentesDeLuz:
-            destino = Point(luz.x + math.cos(math.radians(i/10))*300, luz.y + math.sin(math.radians(i/10))*300)
+            destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*500, luz.fuente.y + math.sin(math.radians(i/10))*500)
             
             if(destino.x<0):
                 destino.x = 0
@@ -39,14 +54,14 @@ def pointLauncher(surface, num):
             if(destino.y>499):
                 destino.y =499
 
-            lineaLuzAPunto = Line (luz.x,luz.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz, destino,surface, 0.9, pixelesPintados)
+            lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
+            pathTracer (lineaLuzAPunto, luz, destino,surface, 1, pixelesPintados, intensidades, colores)
 
 def posWall(surface):
     n=45
     for light in fuentesDeLuz:
         for i in range (n):
-            vaHacia = Point(light.x + math.cos(math.radians(i*85))*1000, light.y + math.sin(math.radians(i*85))*1000)
+            vaHacia = Point(light.fuente.x + math.cos(math.radians(i*85))*1000, light.fuente.y + math.sin(math.radians(i*85))*1000)
             if(vaHacia.x<0):
                 vaHacia.x = 0
             if(vaHacia.x>499):
@@ -55,12 +70,12 @@ def posWall(surface):
                 vaHacia.y = 0
             if(vaHacia.y>499):
                 vaHacia.y =499
-            rayo = Line (light.x,light.y,vaHacia.x,vaHacia.y)
+            rayo = Line (light.fuente.x,light.fuente.y,vaHacia.x,vaHacia.y)
 
             for wall in walls:
                 if  (rayo.lineIntersectOrNot(wall.linea)):
                     puntoInterseccion = rayo.linesIntersection(wall.linea)
-                    if (light.distanciaEntreDosPuntos(puntoInterseccion)<light.distanciaEntreDosPuntos(vaHacia)):
+                    if (light.fuente.distanciaEntreDosPuntos(puntoInterseccion)<light.fuente.distanciaEntreDosPuntos(vaHacia)):
                         vaHacia = puntoInterseccion
                         wallD=wall
 
@@ -82,13 +97,13 @@ def posWall(surface):
                     else:
                         wallD.pos="M"
 
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores):
     interseca = False
     for wall in walls:
         if  (rayo.lineIntersectOrNot(wall.linea)):
             puntoInterseccion = rayo.linesIntersection(wall.linea)
             #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
-            if (puntoFuente.distanciaEntreDosPuntos(puntoInterseccion)<puntoFuente.distanciaEntreDosPuntos(puntoDestino)):
+            if (puntoFuente.fuente.distanciaEntreDosPuntos(puntoInterseccion)<puntoFuente.fuente.distanciaEntreDosPuntos(puntoDestino)):
                 puntoDestino = puntoInterseccion
                 interseca = True
                 boundCercano = wall
@@ -98,18 +113,19 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
             nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
             nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
             #sacamos la intensidad de partida
-            repeticiones = rayo.inicio.distanciaEntreDosPuntos(rayo.final) // (250//12)
-            intensidadDePartida= 1-(repeticiones/10)
+            largoDelRayo = nuevoRayo.inicio.distanciaEntreDosPuntos(nuevoRayo.final)
+            intensidadDePartida= (1-(largoDelRayo/500))**2
         else:
             pass
             nuevoRayo = espejos(rayo, puntoDestino) #NO FUNCIONA ESTA PICHA :C
             nuevoPuntoDestino = nuevoRayo.inicio
             intensidadDePartida = 1 
-             #ARREGLAR LA INTENSIDAD!!!!
-        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, intensidadDePartida, pixelesPintados)
+        #pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles)
 
-    #pygame.draw.line(surface, (255,255,255), (int (puntoFuente.x),int (puntoFuente.y)), (int (puntoDestino.x),int (puntoDestino.y)))
-    drawRayOfLight(surface, px, ref, intensidad, puntoDestino, puntoFuente, pixelesPintados)
+    
+    largoDelRayo = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
+    intensidadDePartida= (1-(largoDelRayo/500))**2
+    drawRayOfLight(surface, px, ref, intensidadDePartida, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores)
 
 def getFrame():
     # grabs the current image and returns it
@@ -134,14 +150,15 @@ i = Image.new("RGB", (500, 500), (0, 0, 0) )
 px = np.array(i)
 
 #reference image for background color
+#im_file = Image.open("BackWhite.png")
 im_file = Image.open("Back.png")
 ref = np.array(im_file)
 
 #light positions
-fuentesDeLuz = [ Point(128,133), Point(373,224) , Point (220,448)]
 
-#light color
-light = np.array([1, 1, 0.75])
+fuentesDeLuz = [Light(128,133, (255,255,255)), Light(373,224, (255,0,0)) , Light(220,448, (0,0,255))]
+#fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
+#fuentesDeLuz = [Light(128,133, (255,255,255))]
 
 #warning, point order affects intersection test!!
 walls = [Bound(14, 23, 173, 23, True), #H2
@@ -183,3 +200,4 @@ while not done:
 
         pygame.display.flip()
         clock.tick(60)
+
