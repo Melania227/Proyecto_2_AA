@@ -20,13 +20,13 @@ class Line:
         y3 = other.inicio.y
         x4 = other.final.x
         y4 = other.final.y
-        
+
         denominador = (x1-x2)*(y3-y4) - (y1-y2)*(x3-x4)
         t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / denominador
 
         xInterseccion = x1 + t*(x2-x1)
         yInterseccion = y1 + t*(y2-y1)
-        
+
         return Point (xInterseccion,yInterseccion)
 
 
@@ -51,3 +51,6 @@ class Line:
 
     def draw(self, screen, color1, color2, color3):
         pygame.draw.line(screen,(color1, color2, color3),(self.inicio.x, self.inicio.y),(self.final.x, self.final.y),3)
+
+    def __str__(self):
+        return str(self.inicio) + " , " + str (self.final)

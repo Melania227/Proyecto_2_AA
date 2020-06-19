@@ -5,20 +5,20 @@ from bresenham import bresenham
 import numpy as np 
 import random
 
-def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, pintados, sonReflejo):
-    trazoPixelesPorPintar = list(bresenham(int(puntoActual.x),int(puntoActual.y),int(fuenteLuz.x),int(fuenteLuz.y)))
-    totalAPintar = 350
+def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, pintados):
+    trazoPixelesPorPintar = list(bresenham(int(fuenteLuz.x),int(fuenteLuz.y),int(puntoActual.x),int(puntoActual.y)))
+    totalAPintar = 250
     rango = totalAPintar//12
     contador=0
 
-    for i in range (len(trazoPixelesPorPintar)-1,0, -1):
+    for i in range (len(trazoPixelesPorPintar)):
         if (contador==rango):
             contador=0
             if (intensidad >= 0.2):
                 intensidad = intensidad - 0.1
         contador += 1
 
-        if (intensidad>1):
+        if (intensidad>0.9):
             intensidad = 0.9
         if (intensidad<0.1):
             intensidad = 0.1
@@ -29,9 +29,6 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, fuenteLuz, 
                 pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])]+=[fuenteLuz]
 
             else:
-                if (fuenteLuz in pintados[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] and not(sonReflejo)):
-                    continue
-
                 if (imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][0] != 0):
                     intensidadPasada =  pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] / imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][0]
                 else:
@@ -66,25 +63,27 @@ def espejos(lineaLuzPunto, interseccion):
     return lineaLuzPunto
 
 def paredesRecursivo(rayoOriginal, puntoInterseccion, wall):
-    largoRayo = puntoInterseccion.distanciaEntreDosPuntos(rayoOriginal.inicio)
-    if (wall.linea.inicio.y == puntoInterseccion.y):
-        #HORIZONTAL
-        if (rayoOriginal.inicio.y > puntoInterseccion.y):
-            #RAYO VIENE DE ABAJO
-            angulo = random.uniform (180,360)
-            puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
-        else:
-            #RAYO VIENE DE ARRIBA
-            angulo = random.uniform (0,180)
-            puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
+    largoRayo = puntoInterseccion.distanciaEntreDosPuntos(rayoOriginal.final)
+
+    #HORIZONTAL
+    if (wall.pos=="H1"):
+        #RAYO VIENE DE ABAJO
+        angulo = random.uniform (181,359)
+    elif (wall.pos=="H2"):
+        #RAYO VIENE DE ARRIBA
+        angulo = random.uniform (1,179)
+    #VERTICAL
+    elif (wall.pos=="V1"):
+        angulo = random.uniform (91,269)
+    elif (wall.pos=="V2"):
+        #RAYO VIENE DE LA IZQUIERDA
+        angulo = random.uniform (271,449)
     else:
-        #VERTICAL
         if (rayoOriginal.inicio.x > puntoInterseccion.x):
-            angulo = random.uniform (90,270)
-            puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
+            angulo = random.uniform (91,269)
         else:
             #RAYO VIENE DE LA IZQUIERDA
-            angulo = random.uniform (270,450)
-            puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
+            angulo = random.uniform (271,449)
 
+    puntoDestino = Point(puntoInterseccion.x + math.cos(math.radians(angulo))*largoRayo, puntoInterseccion.y + math.sin(math.radians(angulo))*largoRayo)
     return puntoDestino
