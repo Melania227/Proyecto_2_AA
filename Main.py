@@ -13,7 +13,7 @@ from Light import *
 
 def pointLauncher(surface, num):
     posWall(surface)
-    
+
     pixelesPintados = []
     for l in range (500):
         fila = []
@@ -34,17 +34,17 @@ def pointLauncher(surface, num):
         for m in range (500):
             fila+=[[0,0,0]]
         colores += [fila]
-    
+
     #for wall in walls:
     #   wall.draw(surface,255,255,255)
     #pygame.draw.circle(surface, (255,255,255), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 5)
-    
-    n=3600    
-    
+
+    n=3600
+
     for i in range (n):
         for luz in fuentesDeLuz:
             destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*500, luz.fuente.y + math.sin(math.radians(i/10))*500)
-            
+
             if(destino.x<0):
                 destino.x = 0
             if(destino.x>499):
@@ -55,25 +55,17 @@ def pointLauncher(surface, num):
                 destino.y =499
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz, destino,surface, 1, pixelesPintados, intensidades, colores)
+            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color)
 
 def posWall(surface):
     n=45
     for light in fuentesDeLuz:
         for i in range (n):
             vaHacia = Point(light.fuente.x + math.cos(math.radians(i*85))*1000, light.fuente.y + math.sin(math.radians(i*85))*1000)
-            if(vaHacia.x<0):
-                vaHacia.x = 0
-            if(vaHacia.x>499):
-                vaHacia.x = 499
-            if(vaHacia.y<0):
-                vaHacia.y = 0
-            if(vaHacia.y>499):
-                vaHacia.y =499
             rayo = Line (light.fuente.x,light.fuente.y,vaHacia.x,vaHacia.y)
 
             for wall in walls:
-                if  (rayo.lineIntersectOrNot(wall.linea)):
+                if  (rayo.lineIntersectOrNot(wall.linea) and wall.esWall):
                     puntoInterseccion = rayo.linesIntersection(wall.linea)
                     if (light.fuente.distanciaEntreDosPuntos(puntoInterseccion)<light.fuente.distanciaEntreDosPuntos(vaHacia)):
                         vaHacia = puntoInterseccion
@@ -96,36 +88,42 @@ def posWall(surface):
                         wallD.pos="V2"
                     else:
                         wallD.pos="M"
-
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz):
     interseca = False
+    mirror = False
     for wall in walls:
         if  (rayo.lineIntersectOrNot(wall.linea)):
-            puntoInterseccion = rayo.linesIntersection(wall.linea)
-            #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
-            if (puntoFuente.fuente.distanciaEntreDosPuntos(puntoInterseccion)<puntoFuente.fuente.distanciaEntreDosPuntos(puntoDestino)):
-                puntoDestino = puntoInterseccion
-                interseca = True
-                boundCercano = wall
-    
-    if (interseca):
-        if (boundCercano.esWall):
-            nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
-            nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
-            #sacamos la intensidad de partida
-            largoDelRayo = nuevoRayo.inicio.distanciaEntreDosPuntos(nuevoRayo.final)
-            intensidadDePartida= (1-(largoDelRayo/500))**2
-        else:
-            pass
-            nuevoRayo = espejos(rayo, puntoDestino) #NO FUNCIONA ESTA PICHA :C
-            nuevoPuntoDestino = nuevoRayo.inicio
-            intensidadDePartida = 1 
-        #pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles)
+            if wall.esWall:
+                puntoInterseccion = rayo.linesIntersection(wall.linea)
+                #Prueba si el punto de interseccion actual es el más cercano a la fuente de luz.
+                if (puntoFuente.distanciaEntreDosPuntos(puntoInterseccion)<puntoFuente.distanciaEntreDosPuntos(puntoDestino)):
+                    puntoDestino = puntoInterseccion
+                    interseca = True
+                    boundCercano = wall
+            else:
+               if  (rayo.lineIntersectOrNot(wall.linea) and puntoFuente.x == 373):
+                    if puntoFuente.distanciaEntreDosPuntos(puntoDestino)>puntoFuente.distanciaEntreDosPuntos(rayo.linesIntersection(wall.linea)):
+                        mirror = True
+                        interseccionEspejo = rayo.linesIntersection(wall.linea)
 
-    
-    largoDelRayo = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
-    intensidadDePartida= (1-(largoDelRayo/500))**2
-    drawRayOfLight(surface, px, ref, intensidadDePartida, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores)
+    if (interseca):
+        nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
+        nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
+        #sacamos la intensidad de partida
+        largoDelRayo = nuevoRayo.inicio.distanciaEntreDosPuntos(nuevoRayo.final)
+        intensidadDePartida= (1-(largoDelRayo/500))**2
+        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
+
+    if (mirror):
+        rayoMirror = Line ( interseccionEspejo.x, interseccionEspejo.y, rayo.final.x, (interseccionEspejo.y-rayo.final.y)+interseccionEspejo.y)
+        largoDelRayo = rayoMirror.inicio.distanciaEntreDosPuntos(rayoMirror.final)
+        intensidadDePartida= (1-(largoDelRayo/500))**2
+        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
+
+
+    drawRayOfLight(surface, px, ref, 0, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
+        # largoDelRayo = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
+
 
 def getFrame():
     # grabs the current image and returns it
@@ -150,8 +148,8 @@ i = Image.new("RGB", (500, 500), (0, 0, 0) )
 px = np.array(i)
 
 #reference image for background color
-#im_file = Image.open("BackWhite.png")
-im_file = Image.open("Back.png")
+im_file = Image.open("BackWhite.png")
+#im_file = Image.open("Back.png")
 ref = np.array(im_file)
 
 #light positions
@@ -161,7 +159,8 @@ fuentesDeLuz = [Light(128,133, (255,255,255)), Light(373,224, (255,0,0)) , Light
 #fuentesDeLuz = [Light(128,133, (255,255,255))]
 
 #warning, point order affects intersection test!!
-walls = [Bound(14, 23, 173, 23, True), #H2
+walls = [Bound(303, 146, 325, 146, False), #Mirror
+        Bound(14, 23, 173, 23, True), #H2
         Bound(14, 23, 14, 256, True ), #V2
         Bound(14, 256, 77, 256, True), #H1
         Bound(77, 256, 77,483, True),  #V2
@@ -200,4 +199,3 @@ while not done:
 
         pygame.display.flip()
         clock.tick(60)
-
