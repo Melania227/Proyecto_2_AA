@@ -18,7 +18,7 @@ def pointLauncher(surface, num):
     for l in range (500):
         fila = []
         for m in range (500):
-            fila+=[Point (0,0)]
+            fila+=[[Point (0,0), False]]
         pixelesPintados += [fila]
 
     intensidades = []
@@ -41,9 +41,11 @@ def pointLauncher(surface, num):
 
     n=3600
 
-    for i in range (n):
-        for luz in fuentesDeLuz:
-            destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*500, luz.fuente.y + math.sin(math.radians(i/10))*500)
+    #for i in range (n):
+    for luz in fuentesDeLuz:
+        for i in range (n):
+        #for luz in fuentesDeLuz:
+            destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*300, luz.fuente.y + math.sin(math.radians(i/10))*300)
 
             if(destino.x<0):
                 destino.x = 0
@@ -55,7 +57,7 @@ def pointLauncher(surface, num):
                 destino.y =499
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color)
+            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0)
 
 def posWall(surface):
     n=45
@@ -88,7 +90,7 @@ def posWall(surface):
                         wallD.pos="V2"
                     else:
                         wallD.pos="M"
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal):
     interseca = False
     mirror = False
     for wall in walls:
@@ -107,22 +109,17 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                         interseccionEspejo = rayo.linesIntersection(wall.linea)
 
     if (interseca):
+        distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
-        #sacamos la intensidad de partida
-        largoDelRayo = nuevoRayo.inicio.distanciaEntreDosPuntos(nuevoRayo.final)
-        intensidadDePartida= (1-(largoDelRayo/500))**2
-        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
+        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
 
     if (mirror):
+        distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         rayoMirror = Line ( interseccionEspejo.x, interseccionEspejo.y, rayo.final.x, (interseccionEspejo.y-rayo.final.y)+interseccionEspejo.y)
-        largoDelRayo = rayoMirror.inicio.distanciaEntreDosPuntos(rayoMirror.final)
-        intensidadDePartida= (1-(largoDelRayo/500))**2
-        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, intensidadDePartida, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
+        pathTracer (rayoMirror, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
 
-
-    drawRayOfLight(surface, px, ref, 0, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz)
-        # largoDelRayo = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
+    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal)
 
 
 def getFrame():
