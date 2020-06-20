@@ -117,7 +117,7 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
     if (mirror):
         distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         rayoMirror = Line ( interseccionEspejo.x, interseccionEspejo.y, rayo.final.x, (interseccionEspejo.y-rayo.final.y)+interseccionEspejo.y)
-        pathTracer (rayoMirror, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
+        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
 
     drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal)
 
@@ -153,7 +153,7 @@ ref = np.array(im_file)
 
 fuentesDeLuz = [Light(128,133, (255,255,255)), Light(373,224, (255,0,0)) , Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
-#fuentesDeLuz = [Light(128,133, (255,255,255))]
+#fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
 #warning, point order affects intersection test!!
 walls = [Bound(303, 146, 325, 146, False), #Mirror
@@ -169,7 +169,7 @@ walls = [Bound(303, 146, 325, 146, False), #Mirror
         Bound(267, 23, 267, 248, True), #V2
         Bound(267, 248, 267, 369, True), #M
         Bound(173, 248, 173,369 , True), #M
-        Bound(173, 23, 173, 248, True), #V1
+        Bound(173, 23, 173, 249, True), #V1
         Bound(173, 248, 267, 248, True) #H2]
         ]
 
