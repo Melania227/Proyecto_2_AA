@@ -6,10 +6,12 @@ class Line:
 
     inicio = Point (0,0)
     final = Point (0,0)
+    fuenteDeLuzAsociada = Point (0,0)
 
-    def __init__(self, x1,y1,x2,y2):
+    def __init__(self, x1,y1,x2,y2,):
         self.inicio = Point (x1,y1)
         self.final = Point (x2,y2)
+        self.fuenteDeLuzAsociada = Point (x1,y1)
 
     def linesIntersection(self, other):
         x1 = self.inicio.x

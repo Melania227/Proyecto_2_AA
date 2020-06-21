@@ -5,7 +5,7 @@ from bresenham import bresenham
 import numpy as np
 import random
 
-def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, largoTotal):
+def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, largoTotal, esMirror):
     trazoPixelesPorPintar = list(bresenham(int(puntoFuente.x),int(puntoFuente.y),int(puntoActual.x),int(puntoActual.y)))
 
     for pixelAct in (trazoPixelesPorPintar):
@@ -24,7 +24,7 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                     intensidadTemp = 1
 
                 #COLOREAMOS SI SE PUEDE:
-                if (puntoFuente == pintados[int(pixelAct[0])][int(pixelAct[1])][0]):
+                if (pintados[int(pixelAct[0])][int(pixelAct[1])][0]):
                     continue
 
                 else:
@@ -38,7 +38,7 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                             pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= colorDeLaLuz[1]/255
                             pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= colorDeLaLuz[2]/255
                             #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = puntoFuente
+                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = True
                             intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
                             colores[int(pixelAct[0])][int(pixelAct[1])] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
                     else:
@@ -52,19 +52,33 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                             pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
                             pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
                             #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = puntoFuente
+                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = True
                             intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
                             colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
 
             else: #ES REFLEJO
-                #INTENSIDAD:
                 largoDelRayo += largoTotal
                 intensidad= (1-(largoDelRayo/707))**2
                 intensidadTemp = intensidadPasada + intensidad
-                if (intensidadTemp>1):
+            
+                if (intensidadTemp>0.8):
+                    intensidadTemp = 0.8
+
+                if (esMirror):
                     intensidadTemp = 1
-                
+                    #INTENSIDAD
+                    pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
+                    #COLOR
+                    nuevoColor = get_color (colores[int(pixelAct[0])][int(pixelAct[1])], colorDeLaLuz)
+                    pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= nuevoColor[0]/255
+                    pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
+                    pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
+                    #REGISTRO
+                    pintados[int(pixelAct[0])][int(pixelAct[1])][1] = True
+                    intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
+                    colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
                #COLOREAMOS SI SE PUEDE:
                 if (pintados[int(pixelAct[0])][int(pixelAct[1])][1]):
                     continue

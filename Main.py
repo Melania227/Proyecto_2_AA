@@ -14,13 +14,6 @@ from Light import *
 def pointLauncher(surface, num):
     posWall(surface)
 
-    pixelesPintados = []
-    for l in range (500):
-        fila = []
-        for m in range (500):
-            fila+=[[Point (0,0), False]]
-        pixelesPintados += [fila]
-
     intensidades = []
     for l in range (500):
         fila = []
@@ -40,11 +33,16 @@ def pointLauncher(surface, num):
     #pygame.draw.circle(surface, (255,255,255), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 5)
 
     n=3600
-
-    #for i in range (n):
     for luz in fuentesDeLuz:
+
+        pixelesPintados = []
+        for l in range (500):
+            fila = []
+            for m in range (500):
+                fila+=[[False, False]]
+            pixelesPintados += [fila]
+
         for i in range (n):
-        #for luz in fuentesDeLuz:
             destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*300, luz.fuente.y + math.sin(math.radians(i/10))*300)
 
             if(destino.x<0):
@@ -57,7 +55,7 @@ def pointLauncher(surface, num):
                 destino.y =499
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0)
+            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False)
 
 def posWall(surface):
     n=45
@@ -90,7 +88,7 @@ def posWall(surface):
                         wallD.pos="V2"
                     else:
                         wallD.pos="M"
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror):
     interseca = False
     mirror = False
     for wall in walls:
@@ -109,17 +107,17 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                         interseccionEspejo = rayo.linesIntersection(wall.linea)
 
     if (interseca):
-        distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
+        distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
-        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
+        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False)
 
     if (mirror):
         distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         rayoMirror = Line ( interseccionEspejo.x, interseccionEspejo.y, rayo.final.x, (interseccionEspejo.y-rayo.final.y)+interseccionEspejo.y)
-        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal)
+        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, True)
 
-    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal)
+    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror)
 
 
 def getFrame():
@@ -145,13 +143,13 @@ i = Image.new("RGB", (500, 500), (0, 0, 0) )
 px = np.array(i)
 
 #reference image for background color
-im_file = Image.open("BackWhite.png")
-#im_file = Image.open("Back.png")
+#im_file = Image.open("BackWhite.png")
+im_file = Image.open("Back.png")
 ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz = [Light(128,133, (255,255,255)), Light(373,224, (255,0,0)) , Light(220,448, (0,0,255))]
+fuentesDeLuz = [Light(128,133, (255,255,255)), Light(220,448, (0,0,255)), Light(373,224, (255,0,0))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
