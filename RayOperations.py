@@ -9,108 +9,107 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
     trazoPixelesPorPintar = list(bresenham(int(puntoFuente.x),int(puntoFuente.y),int(puntoActual.x),int(puntoActual.y)))
 
     for pixelAct in (trazoPixelesPorPintar):
-        puntoDestinoAct = Point(pixelAct[0], pixelAct[1])
+        x=pixelAct[0]
+        y=pixelAct[1]
+        puntoDestinoAct = Point(x, y)
 
-        if (int(pixelAct[0]) >= 0 and int(pixelAct[0]) <=499 and int(pixelAct[1]) >= 0 and int(pixelAct[1]) <=499):
-            intensidadPasada = (intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])])
+
+        if (int(x) >= 0 and int(x) <=499 and int(y) >= 0 and int(y) <=499):
+            intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
             largoDelRayo = puntoFuente.distanciaEntreDosPuntos(puntoDestinoAct)
 
             #ES UN REFLEJO O NO?
             if not (esReflejo): #NO ES REFLEJO
                 #INTENSIDAD:
                 intensidad= (1-(largoDelRayo/500))**2
-                intensidadTemp = intensidadPasada + intensidad
+                intensidadTemp= intensidadPasada + intensidad
                 if (intensidadTemp>1):
                     intensidadTemp = 1
 
                 #COLOREAMOS SI SE PUEDE:
-                if (pintados[int(pixelAct[0])][int(pixelAct[1])][0]):
+                if (pintados[int(x)][int(y)][0]):
                     continue
 
-                else:
-                    if (colores[int(pixelAct[0])][int(pixelAct[1])] == [0,0,0]):
+                if (intensidadTemp >= intensidadPasada):
+                    #INTENSIDAD
+                    pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
+                    pintados[int(x)][int(y)][0] = True
+                    intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
+
+                    if (colores[int(x)][int(y)] == [0,0,0]):
                         #PRIMERA VEZ QUE PINTA
-                        if (intensidadTemp > intensidadPasada):
-                            #INTENSIDAD
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
-                            #COLOR
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= colorDeLaLuz[0]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= colorDeLaLuz[1]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= colorDeLaLuz[2]/255
-                            #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = True
-                            intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
-                            colores[int(pixelAct[0])][int(pixelAct[1])] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
+                        for i in range(0,3):
+                            pixeles[int(x)][int(y)][i] *= colorDeLaLuz[i]/255
+
+                        colores[int(x)][int(y)] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
                     else:
-                        #TOCA COMBINAR COLORES E INTENSIDADES
-                        if (intensidadTemp > intensidadPasada):
-                            #INTENSIDAD
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
-                            #COLOR
-                            nuevoColor = get_color (colores[int(pixelAct[0])][int(pixelAct[1])], colorDeLaLuz)
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= nuevoColor[0]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
-                            #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][0] = True
-                            intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
-                            colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
+                        nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+                        for i in range(0,3):
+                            pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
+
+                        if(x==249 and y==422):
+                            print(nuevoColor)
+                        if(x==276 and y==397):
+                            print(nuevoColor)
+                        colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
 
             else: #ES REFLEJO
-                largoDelRayo += largoTotal
-                intensidad= (1-(largoDelRayo/707))**2
-                intensidadTemp = intensidadPasada + intensidad
-            
-                if (intensidadTemp>0.8):
-                    intensidadTemp = 0.8
-
                 if (esMirror):
                     intensidadTemp = 1
                     #INTENSIDAD
-                    pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
-                    #COLOR
-                    nuevoColor = get_color (colores[int(pixelAct[0])][int(pixelAct[1])], colorDeLaLuz)
-                    pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= nuevoColor[0]/255
-                    pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
-                    pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
-                    #REGISTRO
-                    pintados[int(pixelAct[0])][int(pixelAct[1])][1] = True
-                    intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
-                    colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+                    pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
 
-               #COLOREAMOS SI SE PUEDE:
-                if (pintados[int(pixelAct[0])][int(pixelAct[1])][1]):
-                    continue
+                    #COLOR
+                    nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+
+                    for i in range(0,3):
+                        pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
+
+                    #REGISTRO
+                    pintados[int(x)][int(y)][1] = True
+                    intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
+                    colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
 
                 else:
-                    if (colores[int(pixelAct[0])][int(pixelAct[1])] == [0,0,0]):
-                        #PRIMERA VEZ QUE PINTA
-                        if (intensidadTemp > intensidadPasada):
-                            #INTENSIDAD
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
-                            #COLOR
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= colorDeLaLuz[0]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= colorDeLaLuz[1]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= colorDeLaLuz[2]/255
+
+                    if (pintados[int(x)][int(y)][1]):
+                        continue
+
+
+                    largoDelRayo += largoTotal
+                    intensidad= (1-(largoDelRayo/707))**2
+                    intensidadTemp = intensidadPasada + intensidad
+
+                    if (intensidadTemp>0.8):
+                        intensidadTemp = 0.8
+
+                    if (intensidadTemp >= intensidadPasada):
+
+                        pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
+                        intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
+                        pintados[int(x)][int(y)][1] = True
+
+                        if (colores[int(x)][int(y)] == [0,0,0]):
+                            #PRIMERA VEZ QUE PINTA
+
+                            for i in range(0,3):
+                                pixeles[int(x)][int(y)][i] *= colorDeLaLuz[i]/255
                             #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][1] = True
-                            intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
-                            colores[int(pixelAct[0])][int(pixelAct[1])] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
-                    else:
-                        #TOCA COMBINAR COLORES E INTENSIDADES
-                        if (intensidadTemp > intensidadPasada):
-                            #INTENSIDAD
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])] = imgRef[int(pixelAct[1])][int(pixelAct[0])][:3]*intensidadTemp
-                            #COLOR
-                            nuevoColor = get_color (colores[int(pixelAct[0])][int(pixelAct[1])], colorDeLaLuz)
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][0] *= nuevoColor[0]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][1] *= nuevoColor[1]/255
-                            pixeles[int(pixelAct[0])][int(pixelAct[1])][2] *= nuevoColor[2]/255
+                            intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
+                            colores[int(x)][int(y)] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
+                        else:
+                            #TOCA COMBINAR COLORES E INTENSIDADES
+
+                            nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+                            for i in range(0,3):
+                                pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
                             #REGISTRO
-                            pintados[int(pixelAct[0])][int(pixelAct[1])][1] = True
-                            intensidadesDePixeles[int(pixelAct[0])][int(pixelAct[1])] = intensidadTemp
-                            colores[int(pixelAct[0])][int(pixelAct[1])] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
+                            colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+
 
 
 #ESTO COMBINA LOS COLORES DE DOS PIXELES, EL ACTUAL Y EL DE REFERENCIA:

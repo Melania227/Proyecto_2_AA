@@ -65,29 +65,38 @@ def posWall(surface):
             rayo = Line (light.fuente.x,light.fuente.y,vaHacia.x,vaHacia.y)
 
             for wall in walls:
-                if  (rayo.lineIntersectOrNot(wall.linea) and wall.esWall):
-                    puntoInterseccion = rayo.linesIntersection(wall.linea)
-                    if (light.fuente.distanciaEntreDosPuntos(puntoInterseccion)<light.fuente.distanciaEntreDosPuntos(vaHacia)):
-                        vaHacia = puntoInterseccion
-                        wallD=wall
-
-            if(wallD.linea.inicio.y == wallD.linea.final.y):
-                if (rayo.inicio.y < wallD.linea.inicio.y):
-                    wallD.pos="H1"
-                else:
-                    wallD.pos="H2"
-            else:
-                if (rayo.inicio.x < wallD.linea.inicio.x):
-
-                    if(wallD.pos!="V2" and wallD.pos!="M"):
-                        wallD.pos="V1"
+                if wall.esWall:
+                    if  (rayo.lineIntersectOrNot(wall.linea)):
+                        puntoInterseccion = rayo.linesIntersection(wall.linea)
+                        if (light.fuente.distanciaEntreDosPuntos(puntoInterseccion)<light.fuente.distanciaEntreDosPuntos(vaHacia)):
+                            vaHacia = puntoInterseccion
+                            wallD=wall
+                elif(wall.pos=="none"):
+                    wallD=wall
+                    if(wall.linea.inicio.x==wall.linea.final.x):
+                        wall.pos="V"
                     else:
-                        wallD.pos="M"
-                else:
-                    if(wallD.pos!="V1" and wallD.pos!="M"):
-                        wallD.pos="V2"
+                        wall.pos="H"
+
+            if wallD.esWall:
+                if(wallD.linea.inicio.y == wallD.linea.final.y):
+                    if (rayo.inicio.y < wallD.linea.inicio.y):
+                        wallD.pos="H1"
                     else:
-                        wallD.pos="M"
+                        wallD.pos="H2"
+                else:
+                    if (rayo.inicio.x < wallD.linea.inicio.x):
+                        if(wallD.pos!="V2" and wallD.pos!="M"):
+                            wallD.pos="V1"
+                        else:
+                            wallD.pos="M"
+                    else:
+                        if(wallD.pos!="V1" and wallD.pos!="M"):
+                            wallD.pos="V2"
+                        else:
+                            wallD.pos="M"
+
+
 def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror):
     interseca = False
     mirror = False
@@ -101,12 +110,14 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                     interseca = True
                     boundCercano = wall
             else:
-               if  (rayo.lineIntersectOrNot(wall.linea) and puntoFuente.x == 373):
+               if  (rayo.lineIntersectOrNot(wall.linea)):
                     if puntoFuente.distanciaEntreDosPuntos(puntoDestino)>puntoFuente.distanciaEntreDosPuntos(rayo.linesIntersection(wall.linea)):
                         mirror = True
-                        interseccionEspejo = rayo.linesIntersection(wall.linea)
+                        iT = rayo.linesIntersection(wall.linea)
+                        espejo=wall.pos
 
     if (interseca):
+        
         distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
@@ -114,10 +125,20 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
 
     if (mirror):
         distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
-        rayoMirror = Line ( interseccionEspejo.x, interseccionEspejo.y, rayo.final.x, (interseccionEspejo.y-rayo.final.y)+interseccionEspejo.y)
+        if(espejo=="H"):
+            if(rayo.final.y<iT.y):
+                rayoMirror = Line ( iT.x, iT.y, rayo.final.x, (iT.y-rayo.final.y)+iT.y)
+            else:
+                rayoMirror = Line ( iT.x, iT.y, rayo.final.x, iT.y-(rayo.final.y-iT.y))
+        else:
+            if(rayo.final.x<iT.x):
+                rayoMirror = Line ( iT.x, iT.y,  (iT.x-rayo.final.x)+iT.x, rayo.final.y)
+            else:
+                rayoMirror = Line ( iT.x, iT.y,  iT.x-(rayo.final.x-iT.x), rayo.final.y)
         pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, True)
 
     drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror)
+
 
 
 def getFrame():
@@ -149,13 +170,12 @@ ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz = [Light(128,133, (255,255,255)), Light(220,448, (0,0,255)), Light(373,224, (255,0,0))]
+fuentesDeLuz = [Light(128,133, (0,255,0)), Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
 #warning, point order affects intersection test!!
-walls = [Bound(303, 146, 325, 146, False), #Mirror
-        Bound(14, 23, 173, 23, True), #H2
+walls = [Bound(14, 23, 173, 23, True), #H2
         Bound(14, 23, 14, 256, True ), #V2
         Bound(14, 256, 77, 256, True), #H1
         Bound(77, 256, 77,483, True),  #V2
@@ -168,7 +188,8 @@ walls = [Bound(303, 146, 325, 146, False), #Mirror
         Bound(267, 248, 267, 369, True), #M
         Bound(173, 248, 173,369 , True), #M
         Bound(173, 23, 173, 249, True), #V1
-        Bound(173, 248, 267, 248, True) #H2]
+        Bound(173, 248, 267, 248, True), #H2]
+        Bound(303, 146, 325, 146, False)  #Mirror
         ]
 
 
