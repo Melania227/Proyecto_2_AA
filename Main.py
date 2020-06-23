@@ -117,7 +117,7 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                         espejo=wall.pos
 
     if (interseca):
-        
+
         distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
@@ -170,7 +170,7 @@ ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz = [Light(128,133, (0,255,0)), Light(220,448, (0,0,255))]
+fuentesDeLuz = [Light(128,133, (255,255,0)),Light(220,448, (0,0,255)), Light(373,224, (255,0,0))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
