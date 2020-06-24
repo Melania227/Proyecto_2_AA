@@ -123,22 +123,26 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
         pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False, boundCercano)
 
     if (mirror):
-        distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
-        if(espejo=="H"):
-            if(rayo.final.y<iT.y):
-                rayoMirror = Line ( iT.x, iT.y, rayo.final.x, (iT.y-rayo.final.y)+iT.y)
-            else:
-                rayoMirror = Line ( iT.x, iT.y, rayo.final.x, iT.y-(rayo.final.y-iT.y))
-        else:
-            if(rayo.final.x<iT.x):
-                rayoMirror = Line ( iT.x, iT.y,  (iT.x-rayo.final.x)+iT.x, rayo.final.y)
-            else:
-                rayoMirror = Line ( iT.x, iT.y,  iT.x-(rayo.final.x-iT.x), rayo.final.y)
-        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, True, espejo)
+        res = mirrorFuncion(rayo, iT, espejo)
+        pathTracer (res[0], res[0].inicio, res[0].final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, res[1], True, espejo)
 
     drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana)
 
+def mirrorFuncion(rayo, iT, espejo):
 
+    distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
+    if(espejo=="H"):
+        if(rayo.final.y<iT.y):
+            rayoMirror = Line ( iT.x, iT.y, rayo.final.x, (iT.y-rayo.final.y)+iT.y)
+        else:
+            rayoMirror = Line ( iT.x, iT.y, rayo.final.x, iT.y-(rayo.final.y-iT.y))
+    else:
+        if(rayo.final.x<iT.x):
+            rayoMirror = Line ( iT.x, iT.y,  (iT.x-rayo.final.x)+iT.x, rayo.final.y)
+        else:
+            rayoMirror = Line ( iT.x, iT.y,  iT.x-(rayo.final.x-iT.x), rayo.final.y)
+
+    return [rayoMirror,distanciaTotal]
 
 def getFrame():
     # grabs the current image and returns it
@@ -169,7 +173,7 @@ ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz = [Light(128,133, (255,255,0)),Light(220,448, (0,0,255)), Light(373,224, (255,0,0))]
+fuentesDeLuz = [ Light(373,224, (255,0,0))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
