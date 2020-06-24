@@ -55,7 +55,7 @@ def pointLauncher(surface, num):
                 destino.y =499
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False)
+            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
 
 def posWall(surface):
     n=45
@@ -97,7 +97,7 @@ def posWall(surface):
                             wallD.pos="M"
 
 
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana):
     interseca = False
     mirror = False
     for wall in walls:
@@ -117,11 +117,10 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                         espejo=wall.pos
 
     if (interseca):
-
         distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
-        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False)
+        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False, boundCercano)
 
     if (mirror):
         distanciaTotal = rayo.inicio.distanciaEntreDosPuntos(rayo.final)
@@ -135,9 +134,9 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                 rayoMirror = Line ( iT.x, iT.y,  (iT.x-rayo.final.x)+iT.x, rayo.final.y)
             else:
                 rayoMirror = Line ( iT.x, iT.y,  iT.x-(rayo.final.x-iT.x), rayo.final.y)
-        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, True)
+        pathTracer (rayoMirror, rayoMirror.inicio, rayoMirror.final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, True, espejo)
 
-    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror)
+    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana)
 
 
 
@@ -175,22 +174,21 @@ fuentesDeLuz = [Light(128,133, (255,255,0)),Light(220,448, (0,0,255)), Light(373
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
 #warning, point order affects intersection test!!
-walls = [Bound(14, 23, 173, 23, True), #H2
-        Bound(14, 23, 14, 256, True ), #V2
-        Bound(14, 256, 77, 256, True), #H1
-        Bound(77, 256, 77,483, True),  #V2
-        Bound(77,483, 362, 483, True), #H1
-        Bound(362, 333, 362, 483, True), #V1
-        Bound(362, 333, 488, 333, True), #H1
-        Bound(488, 23, 488, 333, True), #V1
-        Bound(267, 23, 488, 23, True), #H2
-        Bound(267, 23, 267, 248, True), #V2
-        Bound(267, 248, 267, 369, True), #M
-        Bound(173, 248, 173,369 , True), #M
-        Bound(173, 23, 173, 249, True), #V1
-        Bound(173, 248, 267, 248, True), #H2]
-        Bound(303, 146, 325, 146, False)  #Mirror
-        ]
+walls = [Bound(14, 23, 173, 23, True, (255,0,0)), #H2
+        Bound(14, 23, 14, 256, True, (255,0,0)), #V2
+        Bound(14, 256, 77, 256, True, (255,0,0)), #H1
+        Bound(77, 256, 77,483, True, (255,0,0)),  #V2
+        Bound(77,483, 362, 483, True, (255,0,0)), #H1
+        Bound(362, 333, 362, 483, True, (255,0,0)), #V1
+        Bound(362, 333, 488, 333, True, (255,0,0)), #H1
+        Bound(488, 23, 488, 333, True, (255,0,0)), #V1
+        Bound(267, 23, 488, 23, True, (255,0,0)), #H2
+        Bound(267, 23, 267, 248, True, (255,0,0)), #V2
+        Bound(267, 248, 267, 369, True, (255,0,0)), #M
+        Bound(173, 248, 173,369 , True, (255,0,0)), #M
+        Bound(173, 23, 173, 249, True, (255,0,0)), #V1
+        Bound(173, 248, 267, 248, True, (255,0,0)), #H2]
+        Bound(303, 146, 325, 146, False, (255,255,255))]  #Mirror
 
 
 npimage=getFrame()
