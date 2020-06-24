@@ -173,26 +173,26 @@ ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz = [ Light(373,224, (255,0,0))]
+fuentesDeLuz =[Light(128,133, (150,150,0)),Light(220,448, (0,0,150)), Light(373,224, (150,0,0))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
 #warning, point order affects intersection test!!
-walls = [Bound(14, 23, 173, 23, True, (255,0,0)), #H2
-        Bound(14, 23, 14, 256, True, (255,0,0)), #V2
-        Bound(14, 256, 77, 256, True, (255,0,0)), #H1
-        Bound(77, 256, 77,483, True, (255,0,0)),  #V2
-        Bound(77,483, 362, 483, True, (255,0,0)), #H1
-        Bound(362, 333, 362, 483, True, (255,0,0)), #V1
-        Bound(362, 333, 488, 333, True, (255,0,0)), #H1
-        Bound(488, 23, 488, 333, True, (255,0,0)), #V1
-        Bound(267, 23, 488, 23, True, (255,0,0)), #H2
-        Bound(267, 23, 267, 248, True, (255,0,0)), #V2
-        Bound(267, 248, 267, 369, True, (255,0,0)), #M
-        Bound(173, 248, 173,369 , True, (255,0,0)), #M
-        Bound(173, 23, 173, 249, True, (255,0,0)), #V1
-        Bound(173, 248, 267, 248, True, (255,0,0)), #H2]
-        Bound(303, 146, 325, 146, False, (255,255,255))]  #Mirror
+walls = [Bound(14, 23, 173, 23, True, (0,255,0)), #H2
+        Bound(14, 23, 14, 256, True, (0,255,0)), #V2
+        Bound(14, 256, 77, 256, True, (0,255,0)), #H1
+        Bound(77, 256, 77,483, True, (0,255,0)),  #V2
+        Bound(77,483, 362, 483, True, (0,255,0)), #H1
+        Bound(362, 333, 362, 483, True, (0,255,0)), #V1
+        Bound(362, 333, 488, 333, True, (0,255,0)), #H1
+        Bound(488, 23, 488, 333, True, (0,255,0)), #V1
+        Bound(267, 23, 488, 23, True, (0,255,0)), #H2
+        Bound(267, 23, 267, 248, True, (0,255,0)), #V2
+        Bound(267, 248, 267, 369, True, (0,255,0)), #M
+        Bound(173, 248, 173,369 , True, (0,255,0)), #M
+        Bound(173, 23, 173, 249, True, (0,255,0)), #V1
+        Bound(173, 248, 267, 248, True, (0,255,0)), #H2]
+        Bound(303, 146, 325, 146, False, (0,255,0))]  #Mirror
 
 
 npimage=getFrame()

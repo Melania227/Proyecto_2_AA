@@ -71,8 +71,6 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                     colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
                 else:
 
-                    if (pintados[int(x)][int(y)][1] and not x<267):
-                        continue
 
                     largoDelRayo += largoTotal
                     intensidad= (1-(largoDelRayo/707))**2
@@ -102,12 +100,6 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                             colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
 
-
-#ESTO COMBINA LOS COLORES DE DOS PIXELES, EL ACTUAL Y EL DE REFERENCIA:
-#        if(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][0] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][1] == 0 and pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])][2] == 0):
-#            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad
-#        else:
-#            pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])] = get_color(pixeles[int(trazoPixelesPorPintar[i][0])][int(trazoPixelesPorPintar[i][1])], imgRef[int(trazoPixelesPorPintar[i][1])][int(trazoPixelesPorPintar[i][0])][:3]*intensidad)
 
 def get_color(colorRGBA1, colorRGBA2):
     red   = (colorRGBA1[0] + colorRGBA2[0]) / 2
