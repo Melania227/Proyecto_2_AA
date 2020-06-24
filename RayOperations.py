@@ -69,11 +69,9 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                     pintados[int(x)][int(y)][1] = True
                     intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
                     colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
-
-
                 else:
 
-                    if (pintados[int(x)][int(y)][1]):
+                    if (pintados[int(x)][int(y)][1] and not x<267):
                         continue
 
                     largoDelRayo += largoTotal
@@ -90,6 +88,7 @@ def drawRayOfLight(screen, pixeles, imgRef, intensidad, puntoActual, puntoFuente
                         pintados[int(x)][int(y)][1] = True
                         if (colores[int(x)][int(y)] == [0,0,0]):
                             nuevoColor = get_color (paredCercana.color, colorDeLaLuz)
+
                             #PRIMERA VEZ QUE PINTA
                             for i in range(0,3):
                                 pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
