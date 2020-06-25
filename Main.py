@@ -115,6 +115,7 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
                         mirror = True
                         iT = rayo.linesIntersection(wall.linea)
                         espejo=wall.pos
+                        boundEspejo = wall
 
     if (interseca):
         distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
@@ -124,9 +125,9 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
 
     if (mirror):
         res = mirrorFuncion(rayo, iT, espejo)
-        pathTracer (res[0], res[0].inicio, res[0].final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, res[1], True, espejo)
+        pathTracer (res[0], res[0].inicio, res[0].final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, res[1], True, boundEspejo)
 
-    drawRayOfLight(surface, px, ref, 1, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana)
+    drawRayOfLight(px, ref, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana)
 
 def mirrorFuncion(rayo, iT, espejo):
 
@@ -173,7 +174,8 @@ ref = np.array(im_file)
 
 #light positions
 
-fuentesDeLuz =[Light(128,133, (150,150,0)),Light(220,448, (0,0,150)), Light(373,224, (150,0,0))]
+fuentesDeLuz =[Light(128,133, (150,150,0)),Light(220,448, (0,0,150)), Light(373,224, (255,255,255))]
+#fuentesDeLuz =[Light(128,133, (210,85,20)), Light(220,448, (210,150,20)), Light(373,224, (230,230,50))]
 #fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
 #fuentesDeLuz = [Light(373,224, (255,0,0)) ]
 
