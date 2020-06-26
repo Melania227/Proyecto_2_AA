@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 import pygame
 import random
 from PIL import Image
@@ -9,6 +9,7 @@ from Bound import *
 from Line import *
 from RayOperations import *
 from Light import *
+import time
 
 
 def pointLauncher(surface, num):
@@ -45,14 +46,14 @@ def pointLauncher(surface, num):
         for i in range (n):
             destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*300, luz.fuente.y + math.sin(math.radians(i/10))*300)
 
-            if(destino.x<0):
+            '''if(destino.x<0):
                 destino.x = 0
             if(destino.x>499):
                 destino.x = 499
             if(destino.y<0):
                 destino.y = 0
             if(destino.y>499):
-                destino.y =499
+                destino.y =499'''
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
             pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
@@ -146,76 +147,74 @@ def mirrorFuncion(rayo, iT, espejo):
     return [rayoMirror,distanciaTotal]
 
 def getFrame():
-    # grabs the current image and returns it
-    pixels = np.roll(px,(1,2),(0,1))
+    #Ajusta los pixeles actualizados para colocar la imagen
+    pixels = numpy.roll(px,(1,2),(0,1))
     return pixels
 
-
-#pygame stuff
-h,w=550,550
-border=50
-pygame.init()
-screen = pygame.display.set_mode((w+(2*border), h+(2*border)))
-pygame.display.set_caption("2D Raytracing")
-done = False
-clock = pygame.time.Clock()
-
-#init random
-random.seed()
-
-#image setup
+#CREACIÓN DEL CONTENEDOR DE LA IMAGEN
 i = Image.new("RGB", (500, 500), (0, 0, 0) )
-px = np.array(i)
+px = numpy.array(i)
 
-#reference image for background color
-#im_file = Image.open("BackWhite.png")
+#CARGA DE IMAGEN
+#im_file = Image.open("BackWhite.png") VERSIÓN FONDO BLANCO
 im_file = Image.open("Back.png")
-ref = np.array(im_file)
+ref = numpy.array(im_file)
 
-#light positions
+#FUENTES DE LUZ
+fuentesDeLuz =[Light(128,133, (153,0,102)),Light(220,448, (0,0,150)), Light(373,224, (255,255,255))]
 
-fuentesDeLuz =[Light(128,133, (150,150,0)),Light(220,448, (0,0,150)), Light(373,224, (255,255,255))]
-#fuentesDeLuz =[Light(128,133, (210,85,20)), Light(220,448, (210,150,20)), Light(373,224, (230,230,50))]
-#fuentesDeLuz = [Light(128,133, (255,255,255)),Light(220,448, (0,0,255))]
-#fuentesDeLuz = [Light(373,224, (255,0,0)) ]
-
-#warning, point order affects intersection test!!
-walls = [Bound(14, 23, 173, 23, True, (0,255,0)), #H2
-        Bound(14, 23, 14, 256, True, (0,255,0)), #V2
-        Bound(14, 256, 77, 256, True, (0,255,0)), #H1
-        Bound(77, 256, 77,483, True, (0,255,0)),  #V2
-        Bound(77,483, 362, 483, True, (0,255,0)), #H1
-        Bound(362, 333, 362, 483, True, (0,255,0)), #V1
-        Bound(362, 333, 488, 333, True, (0,255,0)), #H1
-        Bound(488, 23, 488, 333, True, (0,255,0)), #V1
-        Bound(267, 23, 488, 23, True, (0,255,0)), #H2
-        Bound(267, 23, 267, 248, True, (0,255,0)), #V2
-        Bound(267, 248, 267, 369, True, (0,255,0)), #M
-        Bound(173, 248, 173,369 , True, (0,255,0)), #M
-        Bound(173, 23, 173, 249, True, (0,255,0)), #V1
-        Bound(173, 248, 267, 248, True, (0,255,0)), #H2]
-        Bound(303, 146, 325, 146, False, (0,255,0))]  #Mirror
+#PAREDES, su orden afecta funcionamiento
+walls = [Bound(14, 23, 173, 23, True, (96,57,34)), #H2
+        Bound(14, 23, 14, 256, True, (96,57,34)), #V2
+        Bound(14, 256, 77, 256, True, (96,57,34)), #H1
+        Bound(77, 256, 77,483, True, (96,57,34)),  #V2
+        Bound(77,483, 362, 483, True, (96,57,34)), #H1
+        Bound(362, 333, 362, 483, True, (96,57,34)), #V1
+        Bound(362, 333, 488, 333, True, (96,57,34)), #H1
+        Bound(488, 23, 488, 333, True, (96,57,34)), #V1
+        Bound(267, 23, 488, 23, True, (96,57,34)), #H2
+        Bound(267, 23, 267, 248, True, (96,57,34)), #V2
+        Bound(267, 248, 267, 369, True, (96,57,34)), #M
+        Bound(173, 248, 173,369 , True, (96,57,34)), #M
+        Bound(173, 23, 173, 249, True, (96,57,34)), #V1
+        Bound(173, 248, 267, 248, True, (96,57,34)), #H2
+        Bound(303, 146, 325, 146, False, (255,255,255))]  #Mirror
 
 
-npimage=getFrame()
-surface = pygame.surfarray.make_surface(npimage)
-#thread
-t = threading.Thread(target = pointLauncher, args=(surface,0)) # f being the function that tells how the ball should move
-t.setDaemon(True) # Alternatively, you can use "t.daemon = True"
-t.start()
+imagenPixelesNumpy=getFrame()
+surface = pygame.surfarray.make_surface(imagenPixelesNumpy)
 
-#main loop
-while not done:
+#DEFINCIÓN DE UN THREAD:
+t = threading.Thread(target = pointLauncher, args=(surface,0)) 
+t.setDaemon(True)
+t.start() #Con t.join() se puede matar el thread pero no es buena idea si no se paran el resto de cosas.
+
+def pathTracingInicializator(done, screen, border):
+    while not done:
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True
+            if event.type == pygame.QUIT:
+                done = True
 
         screen.fill((255, 255, 255))
 
-        npimage=getFrame()
-        surface = pygame.surfarray.make_surface(npimage)
+        imagenPixelesNumpy=getFrame()
+        surface = pygame.surfarray.make_surface(imagenPixelesNumpy)
 
         screen.blit(surface, (border, border))
 
         pygame.display.flip()
-        clock.tick(60)
+
+def main ():
+    h,w=550,550
+    border=50
+    pygame.init()
+    screen = pygame.display.set_mode((w+(2*border), h+(2*border)))
+    pygame.display.set_caption("2D Path Tracing by Melania & Paola")
+    done = False
+    #Tomamos el tiempo de duración AHORITA TOMA DESDE QUE CORRE HASTA QUE SOY A LA X *******
+    iniciarTimer=time.time()
+    pathTracingInicializator(done, screen, border)
+    finalizarTimer = time.time() - iniciarTimer
+    print (finalizarTimer)
+
+main()
