@@ -42,14 +42,16 @@ def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActu
                 intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
 
                 if (colores[int(x)][int(y)] == [0,0,0]):
+                    nuevoColor = get_color (colorDeLaLuz, paredCercana.color)
                     #PRIMERA VEZ QUE PINTA
                     for i in range(0,3):
-                        pixeles[int(x)][int(y)][i] *= colorDeLaLuz[i]/255
+                        pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
 
-                    colores[int(x)][int(y)] = [colorDeLaLuz[0],colorDeLaLuz[1], colorDeLaLuz[2]]
+                    colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
                 else:
 
                     nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+                    nuevoColor = get_color (nuevoColor, paredCercana.color)
                     for i in range(0,3):
                         pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
 
@@ -71,7 +73,6 @@ def drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoA
         if (int(x) >= 0 and int(x) <=499 and int(y) >= 0 and int(y) <=499):
             intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
             largoDelRayo = puntoFuente.distanciaEntreDosPuntos(puntoDestinoAct)
-
 
             largoDelRayo += largoTotal
             intensidad= (1-(largoDelRayo/707))**2

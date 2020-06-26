@@ -46,16 +46,8 @@ def pointLauncher(surface, recursos):
             distancia = random.uniform (300,400)
             direccion = random.uniform (0,360)
 
+            #destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*300, luz.fuente.y + math.sin(math.radians(i/10))*300)
             destino = Point(luz.fuente.x + math.cos(math.radians(direccion))*distancia, luz.fuente.y + math.sin(math.radians(direccion))*distancia)
-
-            '''if(destino.x<0):
-                destino.x = 0
-            if(destino.x>499):
-                destino.x = 499
-            if(destino.y<0):
-                destino.y = 0
-            if(destino.y>499):
-                destino.y =499'''
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
             pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
