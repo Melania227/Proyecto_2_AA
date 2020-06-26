@@ -42,10 +42,10 @@ def pointLauncher(surface, recursos):
                 fila+=[[False, False]]
             pixelesPintados += [fila]
 
-        distancia = random.uniform (200,500)
-        direccion = random.uniform (0,360)
-
         for i in range (recursos):
+            distancia = random.uniform (300,400)
+            direccion = random.uniform (0,360)
+
             destino = Point(luz.fuente.x + math.cos(math.radians(direccion))*distancia, luz.fuente.y + math.sin(math.radians(direccion))*distancia)
 
             '''if(destino.x<0):
@@ -60,7 +60,7 @@ def pointLauncher(surface, recursos):
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
             pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
     print ("Terminamos.")
-    
+
 def posWall(surface):
     n=45
     for light in fuentesDeLuz:
@@ -164,7 +164,7 @@ im_file = Image.open("Back.png")
 ref = numpy.array(im_file)
 
 #FUENTES DE LUZ
-fuentesDeLuz =[Light(128,133, (153,0,102)),Light(220,448, (0,0,150)), Light(373,224, (255,255,255))]
+fuentesDeLuz =[Light(128,133, (153,0,102)),Light(220,448, (0,0,150)), Light(373,224, (155,155,155))]
 
 #PAREDES, su orden afecta funcionamiento
 walls = [Bound(14, 23, 173, 23, True, (96,57,34)), #H2

@@ -106,7 +106,7 @@ def drawRayOfLightLuzReflejoEspejo(trazoPixelesPorPintar, pixeles, imgRef, punto
         x=pixelAct[0]
         y=pixelAct[1]
 
-        intensidadTemp = 1
+        intensidadTemp = 0.9
         #INTENSIDAD
         pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
 
