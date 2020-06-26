@@ -12,7 +12,7 @@ from Light import *
 import time
 
 
-def pointLauncher(surface, num):
+def pointLauncher(surface, recursos):
     posWall(surface)
 
     intensidades = []
@@ -33,7 +33,6 @@ def pointLauncher(surface, num):
     #   wall.draw(surface,255,255,255)
     #pygame.draw.circle(surface, (255,255,255), [fuentesDeLuz[0].x,fuentesDeLuz[0].y], 5)
 
-    n=3600
     for luz in fuentesDeLuz:
 
         pixelesPintados = []
@@ -43,8 +42,11 @@ def pointLauncher(surface, num):
                 fila+=[[False, False]]
             pixelesPintados += [fila]
 
-        for i in range (n):
-            destino = Point(luz.fuente.x + math.cos(math.radians(i/10))*300, luz.fuente.y + math.sin(math.radians(i/10))*300)
+        distancia = random.uniform (200,500)
+        direccion = random.uniform (0,360)
+
+        for i in range (recursos):
+            destino = Point(luz.fuente.x + math.cos(math.radians(direccion))*distancia, luz.fuente.y + math.sin(math.radians(direccion))*distancia)
 
             '''if(destino.x<0):
                 destino.x = 0
@@ -57,7 +59,8 @@ def pointLauncher(surface, num):
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
             pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
-
+    print ("Terminamos.")
+    
 def posWall(surface):
     n=45
     for light in fuentesDeLuz:
@@ -185,7 +188,7 @@ imagenPixelesNumpy=getFrame()
 surface = pygame.surfarray.make_surface(imagenPixelesNumpy)
 
 #DEFINCIÓN DE UN THREAD:
-t = threading.Thread(target = pointLauncher, args=(surface,0)) 
+t = threading.Thread(target = pointLauncher, args=(surface,3600)) 
 t.setDaemon(True)
 t.start() #Con t.join() se puede matar el thread pero no es buena idea si no se paran el resto de cosas.
 
