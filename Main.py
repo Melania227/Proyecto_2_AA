@@ -14,7 +14,7 @@ import time
 
 def pointLauncher(surface, recursos):
     posWall(surface)
-
+    iniciarTimer=time.time()
     intensidades = []
     for l in range (500):
         fila = []
@@ -52,6 +52,8 @@ def pointLauncher(surface, recursos):
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
             pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
     print ("Terminamos.")
+    finalizarTimer = time.time() - iniciarTimer
+    print (finalizarTimer)
 
 def posWall(surface):
     n=45
@@ -207,9 +209,6 @@ def main ():
     pygame.display.set_caption("2D Path Tracing by Melania & Paola")
     done = False
     #Tomamos el tiempo de duración AHORITA TOMA DESDE QUE CORRE HASTA QUE SOY A LA X *******
-    iniciarTimer=time.time()
     pathTracingInicializator(done, screen, border)
-    finalizarTimer = time.time() - iniciarTimer
-    print (finalizarTimer)
 
 main()

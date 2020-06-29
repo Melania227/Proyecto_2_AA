@@ -25,7 +25,7 @@ def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActu
             largoDelRayo = puntoFuente.distanciaEntreDosPuntos(puntoDestinoAct)
 
             #INTENSIDAD:
-            intensidad= (1-(largoDelRayo/500))**2
+            intensidad= (1-(largoDelRayo/300))**2
             intensidadTemp= intensidadPasada + intensidad
 
             if (intensidadTemp>0.8):
@@ -72,14 +72,12 @@ def drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoA
         
         if (int(x) >= 0 and int(x) <=499 and int(y) >= 0 and int(y) <=499):
             intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
-            largoDelRayo = puntoFuente.distanciaEntreDosPuntos(puntoDestinoAct)
 
-            largoDelRayo += largoTotal
-            intensidad= (1-(largoDelRayo/707))**2
+            intensidad = 0.005
             intensidadTemp = intensidadPasada + intensidad
 
-            if (intensidadTemp>0.6):
-                intensidadTemp = 0.6
+            if (intensidadTemp>0.8):
+                intensidadTemp = 0.8
 
             if (intensidadTemp >= intensidadPasada):
 
