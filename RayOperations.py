@@ -1,20 +1,19 @@
 from Point import *
 import math
-from Line import *
 from bresenham import bresenham
 import numpy as np
 import random
 
 #LARGO DEL RAYO!!!!
-def drawRayOfLight(pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, largoTotal, esMirror, paredCercana):
+def drawRayOfLight(pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, largoTotal, esMirror, paredCercana, intensidadLuz):
     trazoPixelesPorPintar = list(bresenham(int(puntoFuente.x),int(puntoFuente.y),int(puntoActual.x),int(puntoActual.y)))
 
     if not(esReflejo):
-        drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana)
+        drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz * 1000)
     else:
-        drawRayOfLightLuzReflejos(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, esMirror, paredCercana)
+        drawRayOfLightLuzReflejos(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, esMirror, paredCercana, intensidadLuz)
 
-def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana):
+def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz):
     for pixelAct in (trazoPixelesPorPintar):
         x=pixelAct[0]
         y=pixelAct[1]
@@ -24,8 +23,10 @@ def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActu
             intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
             largoDelRayo = puntoFuente.distanciaEntreDosPuntos(puntoDestinoAct)
 
-            #INTENSIDAD:
-            intensidad= (1-(largoDelRayo/300))**2
+            #INTENSIDAD: 
+            if (largoDelRayo >= intensidadLuz):
+                largoDelRayo = intensidadLuz-1
+            intensidad= (1-(largoDelRayo/intensidadLuz))**2
             intensidadTemp= intensidadPasada + intensidad
 
             if (intensidadTemp>0.8):
@@ -57,23 +58,22 @@ def drawRayOfLightLuzPrincipal(trazoPixelesPorPintar, pixeles, imgRef, puntoActu
 
                     colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
-def drawRayOfLightLuzReflejos(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, esMirror, paredCercana):
+def drawRayOfLightLuzReflejos(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, esMirror, paredCercana, intensidadLuz):
     if (esMirror):
-        drawRayOfLightLuzReflejoEspejo(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana)
+        drawRayOfLightLuzReflejoEspejo(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz)
     else:
-        drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana)
+        drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz)
 
 
-def drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana):
+def drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz):
+    intensidad = (intensidadLuz * 1.8) / 100
     for pixelAct in (trazoPixelesPorPintar):
         x=pixelAct[0]
         y=pixelAct[1]
-        puntoDestinoAct = Point(x, y)
         
         if (int(x) >= 0 and int(x) <=499 and int(y) >= 0 and int(y) <=499):
             intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
 
-            intensidad = 0.005
             intensidadTemp = intensidadPasada + intensidad
 
             if (intensidadTemp>0.8):
@@ -100,25 +100,37 @@ def drawRayOfLightLuzReflejoPared(trazoPixelesPorPintar, pixeles, imgRef, puntoA
                     colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
 
-def drawRayOfLightLuzReflejoEspejo(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana):
+def drawRayOfLightLuzReflejoEspejo(trazoPixelesPorPintar, pixeles, imgRef, puntoActual, puntoFuente, pintados, intensidadesDePixeles, colores, colorDeLaLuz, largoTotal, paredCercana, intensidadLuz):
     for pixelAct in (trazoPixelesPorPintar):
         x=pixelAct[0]
         y=pixelAct[1]
+        if (int(x) >= 0 and int(x) <=499 and int(y) >= 0 and int(y) <=499):
+            intensidadPasada = (intensidadesDePixeles[int(x)][int(y)])
 
-        intensidadTemp = 0.9
-        #INTENSIDAD
-        pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
+            if (intensidadLuz <= 0.4):
+                intensidadTemp=intensidadPasada + intensidadLuz+0.1
+            else:
+                intensidadLuz = - (intensidadLuz - (intensidadLuz + 0.1))
+                intensidadTemp = intensidadPasada + (1 - intensidadLuz)
 
-        #COLOR
-        nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+            if (intensidadTemp<0.1):
+                intensidadTemp = 0.1
+            if (intensidadTemp>1):
+                intensidadTemp =1
 
-        for i in range(0,3):
-            pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
+            #INTENSIDAD
+            pixeles[int(x)][int(y)] = imgRef[int(y)][int(x)][:3]*intensidadTemp
 
-        #REGISTRO
-        pintados[int(x)][int(y)][1] = True
-        intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
-        colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
+            #COLOR
+            nuevoColor = get_color (colores[int(x)][int(y)], colorDeLaLuz)
+
+            for i in range(0,3):
+                pixeles[int(x)][int(y)][i] *= nuevoColor[i]/255
+
+            #REGISTRO
+            pintados[int(x)][int(y)][1] = True
+            intensidadesDePixeles[int(x)][int(y)] = intensidadTemp
+            colores[int(x)][int(y)] = [nuevoColor[0],nuevoColor[1], nuevoColor[2]]
 
 def get_color(colorRGBA1, colorRGBA2):
     red   = (colorRGBA1[0] + colorRGBA2[0]) / 2

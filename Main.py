@@ -50,10 +50,9 @@ def pointLauncher(surface, recursos):
             destino = Point(luz.fuente.x + math.cos(math.radians(direccion))*distancia, luz.fuente.y + math.sin(math.radians(direccion))*distancia)
 
             lineaLuzAPunto = Line (luz.fuente.x,luz.fuente.y,destino.x,destino.y)
-            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0])
-    print ("Terminamos.")
+            pathTracer (lineaLuzAPunto, luz.fuente, destino,surface, 1, pixelesPintados, intensidades, colores, luz.color, False, 0, False, walls[0], luz.intensidad)
     finalizarTimer = time.time() - iniciarTimer
-    print (finalizarTimer)
+    print ("Duración del algoritmo: " + str(finalizarTimer))
 
 def posWall(surface):
     n=45
@@ -95,7 +94,7 @@ def posWall(surface):
                             wallD.pos="M"
 
 
-def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana):
+def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana, intensidadLuz):
     interseca = False
     mirror = False
     for wall in walls:
@@ -119,13 +118,13 @@ def pathTracer (rayo, puntoFuente, puntoDestino, surface, intensidad, pixelesPin
         distanciaTotal += rayo.inicio.distanciaEntreDosPuntos(rayo.final)
         nuevoPuntoDestino = paredesRecursivo(rayo, puntoDestino, boundCercano)
         nuevoRayo = Line (puntoDestino.x, puntoDestino.y, nuevoPuntoDestino.x, nuevoPuntoDestino.y)
-        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False, boundCercano)
+        pathTracer (nuevoRayo, puntoDestino, nuevoPuntoDestino, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, distanciaTotal, False, boundCercano, intensidadLuz)
 
     if (mirror):
         res = mirrorFuncion(rayo, iT, espejo)
-        pathTracer (res[0], res[0].inicio, res[0].final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, res[1], True, boundEspejo)
+        pathTracer (res[0], res[0].inicio, res[0].final, surface, 1, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, True, res[1], True, boundEspejo, intensidadLuz)
 
-    drawRayOfLight(px, ref, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana)
+    drawRayOfLight(px, ref, puntoDestino, puntoFuente, pixelesPintados, intensidadesDePixeles, colores, colorDeLaLuz, esReflejo, distanciaTotal, esMirror, paredCercana, intensidadLuz)
 
 def mirrorFuncion(rayo, iT, espejo):
 
@@ -158,7 +157,7 @@ im_file = Image.open("Back.png")
 ref = numpy.array(im_file)
 
 #FUENTES DE LUZ
-fuentesDeLuz =[Light(128,133, (153,0,102)),Light(220,448, (0,0,150)), Light(373,224, (155,155,155))]
+fuentesDeLuz =[Light(128,133, (153,0,102), 0.3),Light(220,448, (0,0,150), 0.3), Light(373,224, (155,155,155), 0.3)]
 
 #PAREDES, su orden afecta funcionamiento
 walls = [Bound(14, 23, 173, 23, True, (96,57,34)), #H2
@@ -181,11 +180,6 @@ walls = [Bound(14, 23, 173, 23, True, (96,57,34)), #H2
 imagenPixelesNumpy=getFrame()
 surface = pygame.surfarray.make_surface(imagenPixelesNumpy)
 
-#DEFINCIÓN DE UN THREAD:
-t = threading.Thread(target = pointLauncher, args=(surface,3600)) 
-t.setDaemon(True)
-t.start() #Con t.join() se puede matar el thread pero no es buena idea si no se paran el resto de cosas.
-
 def pathTracingInicializator(done, screen, border):
     while not done:
         for event in pygame.event.get():
@@ -202,13 +196,20 @@ def pathTracingInicializator(done, screen, border):
         pygame.display.flip()
 
 def main ():
+    print ("Introduzca la cantidad de recursos que desea utilizar: ")
+    cantidadRecursos = input()
+    cantidadRecursos = int(cantidadRecursos, base=10)
     h,w=550,550
     border=50
     pygame.init()
     screen = pygame.display.set_mode((w+(2*border), h+(2*border)))
     pygame.display.set_caption("2D Path Tracing by Melania & Paola")
     done = False
-    #Tomamos el tiempo de duración AHORITA TOMA DESDE QUE CORRE HASTA QUE SOY A LA X *******
+    #DEFINCIÓN DE UN THREAD:
+    t = threading.Thread(target = pointLauncher, args=(surface,cantidadRecursos)) 
+    t.setDaemon(True)
+    t.start() #Con t.join() se puede matar el thread pero no es buena idea si no se paran el resto de cosas.
+
     pathTracingInicializator(done, screen, border)
 
 main()
